@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "acorn": "^8.8.1",
+    "magic-string": "^0.26.7"
+  },
+  "devDependencies": {
+    "jest": "^29.3.1"
+  }
+}
