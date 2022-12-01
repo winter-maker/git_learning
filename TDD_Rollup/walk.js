@@ -1,14 +1,31 @@
 /**
- * visit 访问者；遍历器
- * @param {*} node //当前节点
- * @param {*} parent  //父节点
- * @param {*} enter     //进入节点时的回调函数
- * @param {*} leave     //离开节点时的回调函数
- * @returns 
+ * AST语法树遍历
+ */
+function walk(ast, { enter, leave }) {
+  visit(ast, null, enter, leave);
+}
+
+/**
+ * 访问者
+ * @param {*} node
+ * @param {*} parent
+ * @param {*} enter
+ * @param {*} leave
+ * @returns
  */
 function visit(node, parent, enter, leave) {
-    enter(node)
-    leave(node)
-    return '1'
+  // 实现部分
+
+  if (typeof node !== "object") {
+    return;
+  }
+  enter && enter(node, parent);
+  const children = Array.isArray(node) ? node : Object.values(node);
+  children.forEach((c) => {
+    visit(c, node, enter, leave);
+  });
+  leave && leave(node, parent);
+  return;
 }
-module.exports = visit
+
+module.exports = walk;
