@@ -26,7 +26,7 @@ describe("AST Analyse方法", () => {
   //   const { ast, magicString } = getCode(`const a = () => 'a'`)
 
   //   analyse(ast, magicString)
-  //   expect(ast._scope.cantains('a')).toBe(true)
+  //   expect(ast._scope.contains('a')).toBe(true)
   //   // expect(ast._scope.findDefiningScope('a')).toBe(true)
 
   //   expect(ast.body[0]._defines).toEqual({ a: true })  // 变量定义
@@ -41,7 +41,7 @@ describe("AST Analyse方法", () => {
       const { ast, magicString } = getCode(`const a = () => 'a'`);
 
       analyse(ast, magicString);
-      expect(ast._scope.cantains("a")).toBe(true);
+      expect(ast._scope.contains("a")).toBe(true);
       expect(ast._scope.findDefiningScope("a")).toEqual(ast._scope);
       expect(ast.body[0]._defines).toEqual({ a: true }); // 变量定义
     });
@@ -53,9 +53,9 @@ describe("AST Analyse方法", () => {
       );
 
       analyse(ast, magicString);
-      expect(ast._scope.cantains("a")).toBe(true);
+      expect(ast._scope.contains("a")).toBe(true);
       expect(ast._scope.findDefiningScope("a")).toEqual(ast._scope);
-      expect(ast._scope.cantains("b")).toBe(true);
+      expect(ast._scope.contains("b")).toBe(true);
       expect(ast._scope.findDefiningScope("b")).toEqual(ast._scope);
       expect(ast.body[0]._defines).toEqual({ a: true }); // 变量定义
       expect(ast.body[1]._defines).toEqual({ b: true }); // 变量定义
@@ -71,9 +71,9 @@ describe("AST Analyse方法", () => {
       );
 
       analyse(ast, magicString);
-      expect(ast._scope.cantains("a")).toBe(true);
+      expect(ast._scope.contains("a")).toBe(true);
       expect(ast._scope.findDefiningScope("a")).toEqual(ast._scope);
-      expect(ast._scope.cantains("b")).toBe(true);
+      expect(ast._scope.contains("b")).toBe(true);
       expect(ast._scope.findDefiningScope("b")).toEqual(ast._scope);
       expect(ast.body[0]._defines).toEqual({ a: true }); // 变量定义
       expect(ast.body[1]._defines).toEqual({ b: true }); // 变量定义
@@ -90,11 +90,11 @@ describe("AST Analyse方法", () => {
 
       analyse(ast, magicString);
       // console.log('ast._scope', ast._scope)
-      expect(ast._scope.cantains("a")).toBe(true);
+      expect(ast._scope.contains("a")).toBe(true);
       expect(ast._scope.findDefiningScope("a")).toEqual(ast._scope);
-      expect(ast._scope.cantains("f")).toBe(true);
+      expect(ast._scope.contains("f")).toBe(true);
       expect(ast._scope.findDefiningScope("f")).toEqual(ast._scope);
-      expect(ast.body[1]._scope.cantains("b")).toBe(true);
+      expect(ast.body[1]._scope.contains("b")).toBe(true);
       expect(ast.body[1]._scope.findDefiningScope("f")).toEqual(ast._scope);
       expect(ast.body[1]._scope.findDefiningScope("b")).toEqual(
         ast.body[1]._scope

@@ -1,28 +1,28 @@
 const acorn = require("acorn");
-const walk = require("walk");
+const analyse = require("./analyse");
+const MagicString = require("magic-string");
 class Module {
   constructor(props) {
     const { code } = props || {};
-    this.code = code;
-    this.ast = acorn.parse(this.code, {
+    this.code = new MagicString(code);
+    this.ast = acorn.parse(code, {
       locations: true,
       ranges: true,
       sourceType: "module",
       ecmaVersion: 7,
     });
+    analyse(this.ast, this.code, this);
     this.analyse();
   }
   expandAllStatement() {
     const allStatements = [];
     this.ast.body.forEach((node) => {
-      if (
-        node.type === "ImportDeclaration" ||
-        node.type === "VariableDeclaration"
-      )
-        return;
+      if (node.type === "ImportDeclaration") return;
+      if (node.type === "VariableDeclaration") return;
       const statements = this.expandStatement(node);
       allStatements.push(...statements);
     });
+    //console.log("-allStatements---", allStatements);
     return allStatements;
   }
   // 语句扩展：声明 + 调用
@@ -30,9 +30,9 @@ class Module {
     const result = [];
     const _dependsOn = statement._dependsOn;
     Object.keys(_dependsOn).forEach((key) => {
-      console.log(_dependsOn[key]);
       result.push(this.define(key));
     });
+    result.push(statement);
     return result;
   }
   /**
@@ -50,43 +50,46 @@ class Module {
     this.imports = {};
     this.exports = {};
     this.definitions = {};
+
     this.ast.body.forEach((node) => {
-      walk(node, {
-        enter(node) {
-          switch (node.type) {
-            case "ImportDeclaration":
-              node.specifiers.forEach((specifier) => {
-                const loaclName = specifier?.local.name;
-                const source = node.source.value;
-                const importedName = specifier?.imported?.name || "";
-                this.imports[loaclName] = {
-                  localName: loaclName,
-                  name: importedName,
-                  source,
-                };
-              });
-              break;
-            case "ExportNamedDeclaration":
-              node.declaration.declarations.forEach((declaration) => {
-                const name = declaration.id.name;
-                this.exports[name] = {
-                  localName: name,
-                  node: node,
-                  expression: node.declaration,
-                };
-              });
-              break;
-            case "VariableDeclaration":
-              node.declarations.forEach((declaration) => {
-                const name = declaration.id.name;
-                this.definitions[name] = node;
-              });
-              break;
-            default:
-              break;
+      switch (node.type) {
+        case "ImportDeclaration":
+          node.specifiers.forEach((specifier) => {
+            const loaclName = specifier?.local.name;
+            const source = node.source.value;
+            const importedName = specifier?.imported?.name || "";
+            this.imports[loaclName] = {
+              localName: loaclName,
+              name: importedName,
+              source,
+            };
+          });
+          break;
+        case "ExportNamedDeclaration":
+          node.declaration.declarations.forEach((declaration) => {
+            const name = declaration.id.name;
+            this.exports[name] = {
+              localName: name,
+              node: node,
+              expression: node.declaration,
+            };
+          });
+          break;
+        case "VariableDeclaration":
+          // node.declarations.forEach((declaration) => {
+          //   const name = declaration.id.name;
+          //   this.definitions[name] = node;
+          // });
+          let _defines = node._defines;
+          for (let k in _defines) {
+            if (_defines[k]) {
+              this.definitions[k] = node;
+            }
           }
-        },
-      });
+          break;
+        default:
+          break;
+      }
     });
   }
 }
