@@ -1,6 +1,11 @@
 const acorn = require("acorn");
 const analyse = require("./analyse");
 const MagicString = require("magic-string");
+
+function has(obj, prop) {
+  return Object.prototype.hasOwnProperty(obj, prop);
+}
+const SYSTEM_VAR = ["console", "log"];
 class Module {
   constructor(props) {
     const { code } = props || {};
@@ -19,6 +24,7 @@ class Module {
     this.ast.body.forEach((node) => {
       if (node.type === "ImportDeclaration") return;
       if (node.type === "VariableDeclaration") return;
+      //console.log("node-", node, node._dependsOn);
       const statements = this.expandStatement(node);
       allStatements.push(...statements);
     });
@@ -27,10 +33,13 @@ class Module {
   }
   // 语句扩展：声明 + 调用
   expandStatement(statement) {
+    // 此语句已被引用
+    statement._included = true;
     const result = [];
     const _dependsOn = statement._dependsOn;
     Object.keys(_dependsOn).forEach((key) => {
-      result.push(this.define(key));
+      //console.log("-key--", key);
+      result.push(...this.define(key));
     });
     result.push(statement);
     return result;
@@ -40,10 +49,22 @@ class Module {
    *
    */
   define(name) {
-    if (false) {
-      // import 声明,来自于其他模块
+    if (has(this.imports, name)) {
+      // import 声明,来自于其他模块,加载模块
     } else {
-      return this.definitions[name];
+      const statement = this.definitions[name];
+      if (statement) {
+        if (statement._included) {
+          return [];
+        } else {
+          // 递归
+          return this.expandStatement(statement);
+        }
+      } else if (SYSTEM_VAR.includes(name)) {
+        return [];
+      } else {
+        throw new Error(`没有此变量${name}`);
+      }
     }
   }
   analyse() {
