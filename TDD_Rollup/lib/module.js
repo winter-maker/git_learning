@@ -1,4 +1,7 @@
-const acorn = require("acorn");
+/**
+ * 把单模块进行组装
+ */
+const { parse } = require("acorn");
 const analyse = require("./analyse");
 const MagicString = require("magic-string");
 
@@ -7,18 +10,20 @@ function has(obj, prop) {
 }
 const SYSTEM_VAR = ["console", "log"];
 class Module {
-  constructor(props) {
-    const { code } = props || {};
+  constructor({ code, path, bundle }) {
     this.code = new MagicString(code);
-    this.ast = acorn.parse(code, {
-      locations: true,
-      ranges: true,
+    this.path = path;
+    this.bundle = bundle;
+    this.ast = parse(code, {
+      // locations: true,
+      // ranges: true,
       sourceType: "module",
       ecmaVersion: 7,
     });
     analyse(this.ast, this.code, this);
     this.analyse();
   }
+  // 单模块的treeShaking
   expandAllStatement() {
     const allStatements = [];
     this.ast.body.forEach((node) => {
@@ -51,6 +56,11 @@ class Module {
   define(name) {
     if (has(this.imports, name)) {
       // import 声明,来自于其他模块,加载模块
+      const importDeclaration = this.imports[name];
+      const source = importDeclaration.source;
+      const module = this.bundle.fetchModule(source, this.path);
+      const exportData = module.exports[importDeclaration.name];
+      return module.define(exportData.localName);
     } else {
       const statement = this.definitions[name];
       if (statement) {
