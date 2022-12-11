@@ -2,7 +2,7 @@ const MagicString = require("magic-string");
 const path = require("path");
 const { parse } = require("acorn");
 const analyse = require("./analyse");
-const SYSTEM_VAR = ["console", "log"];
+const SYSTEM_VARIABLES = ["console", "log"];
 
 function has(obj, prop) {
   return Object.prototype.hasOwnProperty.call(obj, prop);
@@ -88,7 +88,11 @@ class Module {
   }
   define(name) {
     if (has(this.imports, name)) {
+      // 加载模块
+      // import项的声明部分
       const importDeclaration = this.imports[name];
+      // 获取msg模块 exports imports
+      // 读取声明模块
       const moduel = this.bundle.fetchModule(
         importDeclaration.source,
         this.path

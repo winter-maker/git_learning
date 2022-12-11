@@ -33,7 +33,7 @@ function analyse(ast, magicString, module) {
       // 此语句是已经包含到输出语句里了
       _included: { value: false, writable: true },
       // 变量语句
-      _scource: { value: magicString.snip(statement.start, statement.end) },
+      _source: { value: magicString.snip(statement.start, statement.end) },
     });
 
     // 作用域遍历，分析变量定义，构造作用域
