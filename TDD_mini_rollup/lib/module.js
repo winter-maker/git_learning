@@ -93,7 +93,7 @@ class Module {
       const importDeclaration = this.imports[name];
       // 获取msg模块 exports imports
       // 读取声明模块
-      const moduel = this.bundle.fetchModule(
+      const module = this.bundle.fetchModule(
         importDeclaration.source,
         this.path
       );
@@ -101,6 +101,7 @@ class Module {
       const exportData = module.exports[importDeclaration.name];
 
       // 低啊用msg模块的define 目的返回
+      console.log("exportData-", exportData);
       return module.define(exportData.localName);
     } else {
       //获取当前的模块内定义的变量，以及定义语句
