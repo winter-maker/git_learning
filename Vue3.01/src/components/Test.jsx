@@ -10,12 +10,18 @@ export default defineComponent({
         list: Array
     },
     setup(props, {slots}) {
-        return () =><div>
+        return () =>
+            <div>
                 <div>{props.title}</div>
                 <p>condition</p>
                 <p>{ props.condition === 'A' ? <span>A</span>: <span>other</span>}</p>
-                <ul>{ props.list.map(res => (<li>{res}</li>))}</ul>
-                <p>{ slots.default()}</p>
+                <ul>
+                    {props.list.map(res => (
+                        <li>{res}</li>
+                    ))}
+                    
+                </ul>
+                <p>{slots.default()}</p>
             </div>
     }
 })
