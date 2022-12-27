@@ -13,8 +13,8 @@ symbol terminalSymbol nonTerminalSymbol "pa" "gu" <word>
 <a> ::= "pa" "gu" "gu"
 <b> ::= "gu" "gu" "gu" "pa"
 <c> ::= "pa"
-<language> ::= <a>+ | <b>+ | <a>+ <b>+ | <a>_<c><b>_
-
+<abc> ::= <a>+ | <b>+ | <a>+<b>+ | <a>_<c><b>_
+<blist> ::= <b> | <b><blist>
 a 和 b 数量必须相等
 <d> ::= <a><b> | <a><b><c> | <c>
 <d> ::= <a><b> | <a><b>[<c>]

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>状态机PK状态模式</title>
+  </head>
+  <body>
+    <button id="btn">开关</button>
+    <script>
+      //状态模式
+      //将每个状态写成一个类，新增不同的状态，新增状态只需增加一个类
+      // 更改状态逻辑放在对应的状态当中。
+      //this.light.currentState = this.light.weakLightState 这步赋值操作是更改状态操作。更改的是light相当于父类。
+      //子类更改父类状态不推荐，所以增加setState 方法
+      class OffLightState {
+        constructor(light) {
+          this.light = light;
+        }
+        buttonWasPressed() {
+          console.log("弱光");
+          //this.light.currentState = this.light.weakLightState;
+          this.light.setState(this.light.weakLightState);
+        }
+      }
+      class WeakLightState {
+        constructor(light) {
+          this.light = light;
+        }
+        buttonWasPressed() {
+          console.log("强光");
+          //this.light.currentState = this.light.strongLightState;
+          this.light.setState(this.light.strongLightState);
+        }
+      }
+      class StrongLightState {
+        constructor(light) {
+          this.light = light;
+        }
+        buttonWasPressed() {
+          console.log("超强光");
+          //this.light.currentState = this.light.offLightState;
+          this.light.setState(this.light.superStrongLightState);
+        }
+      }
+      class SuperStrongLightState {
+        constructor(light) {
+          this.light = light;
+        }
+        buttonWasPressed() {
+          console.log("关灯");
+          //this.light.currentState = this.light.offLightState;
+          this.light.setState(this.light.offLightState);
+        }
+      }
+
+      function Light() {
+        //this.state = "off";
+        // this.offLightState = new OffLightState(this);
+        // this.weakLightState = new WeakLightState(this);
+        // this.strongLightState = new StrongLightState(this);
+        // this.superStrongLightState = new SuperStrongLightState(this);
+        this.offLightState = FSM.off;
+        this.weakLightState = FSM.weakLightState;
+        this.strongLightState = FSM.strongLightState;
+        this.superStrongLightState = FSM.superStrongLightState;
+        this.button = btn;
+        this.currentState = this.offLightState;
+        this.init();
+      }
+      Light.prototype.init = function () {
+        this.button.onclick = () => {
+          this.currentState.buttonWasPressed.call(this);
+        };
+      };
+      Light.prototype.setState = function (state) {
+        this.currentState = state;
+      };
+
+      // 状态机是根据设计模式的状态模式将所有状态整合到一起的一个对象当中。
+      var FSM = {
+        off: {
+          buttonWasPressed() {
+            console.log("弱光");
+            this.setState(this.weakLightState);
+          },
+        },
+        weakLightState: {
+          buttonWasPressed() {
+            console.log("强光");
+            this.setState(this.strongLightState);
+          },
+        },
+        strongLightState: {
+          buttonWasPressed() {
+            console.log("超强光");
+            this.setState(this.superStrongLightState);
+          },
+        },
+        superStrongLightState: {
+          buttonWasPressed() {
+            console.log("关灯");
+            this.setState(this.offLightState);
+          },
+        },
+      };
+      // 不足点：
+      //1、违背开放封闭原则: 没办法修改、拓展
+      //2、胖函数：将所有的状态和更改状态逻辑都放在这一个函数当中。
+      //3、状态切换不明显
+      //4、切换关系不明确
+      //Light.prototype.buttonWasPressed = function () {
+      // if (this.state === "off") {
+      //   console.log("弱光");
+      //   this.state = "weakLight";
+      // } else if (this.state === "weakLight") {
+      //   console.log("强光");
+      //   this.state = "strongLight";
+      // } else if (this.state === "strongLight") {
+      //   this.state = "off";
+      //   console.log("关灯");
+      // }
+      //};
+      new Light();
+    </script>
+  </body>
+</html>
