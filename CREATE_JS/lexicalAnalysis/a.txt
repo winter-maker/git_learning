@@ -1,0 +1,46 @@
+[
+    {
+        "type": "abc",
+        "children": [
+            {
+                "type": "a",
+                "children": [
+                    {
+                        "type": "pa"
+                    },
+                    {
+                        "type": "gu"
+                    },
+                    {
+                        "type": "gu"
+                    }
+                ]
+            },
+            {
+                "type": "blist",
+                "children": [
+                    {
+                        "type": "b",
+                        "children": [
+                            {
+                                "type": "gu"
+                            },
+                            {
+                                "type": "gu"
+                            },
+                            {
+                                "type": "gu"
+                            },
+                            {
+                                "type": "pa"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "type": "EOF"
+    }
+]

@@ -1,25 +1,21 @@
-// LL语法分析
-// 外星语言
+// 外星语言， LL语法分析
 const reg = /(pa|gu)/g;
-const bstr = "gugugupagugugupagugugupa";
-const str = "gugugupagugugupagugugupa";
+const astr = "pagugupagugupagugu";
+const bstr = "gugugupa";
+const cstr = "pa";
 const acstr = "pagugupa";
-const acbstr = "pagugupagugugupa";
 const abstr = "pagugugugugupa";
-const cbstr = "pagugugupa";
-const astr = "pagugupagugupagugupagugupagugupagugu";
 let r;
 let list = [];
 while ((r = reg.exec(abstr))) {
   list.push({ type: r[0] });
-  //console.log(r);
 }
 list.push({
   type: "EOF",
 });
 abc(list);
-console.log(JSON.stringify(list, null, 2));
-// case1 <a> ::= "pa" "gu" "gu"
+console.log(JSON.stringify(list, null, 4));
+
 function a(list) {
   if (list[1].type === "gu" && list[2].type === "gu") {
     const symbol = {
@@ -28,7 +24,6 @@ function a(list) {
     symbol.children = list.splice(0, 3, symbol);
   }
 }
-// case2 <b> ::= "gu" "gu" "gu" "pa"
 function b(list) {
   if (list[1].type === "gu" && list[2].type === "gu" && list[3].type === "pa") {
     const symbol = {
@@ -37,81 +32,51 @@ function b(list) {
     symbol.children = list.splice(0, 4, symbol);
   }
 }
-// case3 <c> ::= "pa"
 function c(list) {
-  const symbol = { type: "c" };
+  const symbol = {
+    type: "c",
+  };
   symbol.children = list.splice(0, 1, symbol);
 }
-
-// <blist> ::= <b> | <b><blist>
-function blist(list) {
-  // 第一个是b
-  if (list[0].type === "gu") {
-    b(list);
-    blist(list);
-  } else if (list[0].type === "b") {
-    // 只有一个b
-    if (list[1].type === "EOF") {
-      const symbol = {
-        type: "blist",
-      };
-      symbol.children = list.splice(0, 1, symbol);
-      // 有多个b
-    } else if (list[1].type === "gu") {
-      const word = list.shift();
-      blist(list);
-      const symbol = {
-        type: "blist",
-      };
-      symbol.children = [word, ...list.splice(0, 1)];
-      list.unshift(symbol);
-    }
-  }
-}
-{
-  /* <a> ::= "pa" "gu" "gu"
-<b> ::= "gu" "gu" "gu" "pa"
-<c> ::= "pa"
-<abc> ::= <a>+ | <b>+ | <a>+<b>+ | <a>*<c><b>*
-<blist> ::= <b> | <b><blist> */
-}
-// case4 <abc> ::= <a>+ | <b>+ | <a>+<b>+ | <a>*<c><b>*
+//<abc> ::= <a>+ | <b>+ | <a><c><b> | <a>+<b>+
+//<blist> ::= <b> | <b><blist>
+//<alist> ::= <a> | <a><alist>
+//<abc> ::= <alist> | <blist> | <a>*<c><b>* | <alist><blist>
 function abc(list) {
-  // 第2个分支
   if (list[0].type === "gu") {
-    blist[list];
-  }
-  // 第1，3，4个分支
-  if (list[0].type === "pa") {
-    // 看前四个符号决定 reduce
-    // c
-    if (list[1].type === "EOF") {
-      c(list);
+    // <blist> 分支
+    blist(list);
+  } else if (list[0].type === "pa") {
+    // <alist>
 
-      //ac
+    if (list[1].type === "EOF") {
+      // <c>
+      c(list);
     } else if (
       list[1].type === "gu" &&
       list[2].type === "gu" &&
       list[3].type === "pa"
     ) {
+      // <a><c>
       const symbol = {
-        type: "ac",
+        type: "abc",
         children: [],
       };
       alist(list);
       symbol.children.push(list.shift());
+
       c(list);
       symbol.children.push(list.shift());
       list.unshift(symbol);
-      //cb
     } else if (
       list[1].type === "gu" &&
       list[2].type === "gu" &&
       list[3].type === "gu" &&
       list[4].type === "pa"
     ) {
+      // <c><b>
       const symbol = {
-        type: "cb",
+        type: "abc",
         children: [],
       };
       c(list);
@@ -119,18 +84,15 @@ function abc(list) {
       blist(list);
       symbol.children.push(list.shift());
       list.unshift(symbol);
-
-      // ab
     } else if (
       list[1].type === "gu" &&
       list[2].type === "gu" &&
       list[3].type === "gu" &&
-      list[4].type === "gu" &&
-      list[5].type === "gu" &&
-      list[6].type === ""
+      list[4].type === "gu"
     ) {
+      // <a><b>
       const symbol = {
-        type: "ab",
+        type: "abc",
         children: [],
       };
       alist(list);
@@ -141,14 +103,11 @@ function abc(list) {
     }
   }
 }
-// a是多个设置alist
 function alist(list) {
-  // 第一个是b
   if (list[0].type === "pa") {
     a(list);
     alist(list);
   } else if (list[0].type === "a") {
-    // 去除 acb
     if (
       list[1].type === "EOF" ||
       (list[1].type === "pa" && list[2].type === "EOF")
@@ -158,11 +117,35 @@ function alist(list) {
       };
       symbol.children = list.splice(0, 1, symbol);
     } else if (list[1].type === "pa") {
-      //第二个pagugu的第一个pa
+      // 第二个pagugu的第一个pa
       const word = list.shift();
       alist(list);
       const symbol = {
         type: "alist",
+      };
+      symbol.children = [word, ...list.splice(0, 1)];
+      list.unshift(symbol);
+    }
+  }
+}
+function blist(list) {
+  //第一个是b
+  if (list[0].type === "gu") {
+    b(list);
+    blist(list);
+  } else if (list[0].type === "b") {
+    // <blist>的第一个分支
+    if (list[1].type === "EOF") {
+      const symbol = {
+        type: "blist",
+      };
+      symbol.children = list.splice(0, 1, symbol);
+    } else if (list[1].type === "gu") {
+      // <blist>第二个分支
+      const word = list.shift();
+      blist(list);
+      const symbol = {
+        type: "blist",
       };
       symbol.children = [word, ...list.splice(0, 1)];
       list.unshift(symbol);

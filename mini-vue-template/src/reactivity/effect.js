@@ -1,8 +1,14 @@
 export let activeEffect = null;
+
+const effectStack = [];
+
 export function effect(fn, options) {
   const effectFn = () => {
     activeEffect = effectFn;
+    effectStack.push(effectFn);
     fn();
+    effectStack.pop();
+    activeEffect = effectStack[effectStack.length - 1];
   };
   effectFn.options = options;
   effectFn();

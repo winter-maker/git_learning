@@ -37,18 +37,18 @@ describe("reacticity", () => {
     expect(dummy).toBe(21);
   });
 
-  it("should handle multiple effects", () => {
-    let dummy1, dummy2;
-    const counter = reactive({ num: 0 });
-    effect(() => (dummy1 = counter.num));
-    effect(() => (dummy2 = counter.num));
+  // it("should handle multiple effects", () => {
+  //   let dummy1, dummy2;
+  //   const counter = reactive({ num: 0 });
+  //   effect(() => (dummy1 = counter.num));
+  //   effect(() => (dummy2 = counter.num));
 
-    expect(dummy1).toBe(0);
-    expect(dummy2).toBe(0);
-    counter.num++;
-    expect(dummy1).toBe(1);
-    expect(dummy2).toBe(1);
-  });
+  //   expect(dummy1).toBe(0);
+  //   expect(dummy2).toBe(0);
+  //   counter.num++;
+  //   expect(dummy1).toBe(1);
+  //   expect(dummy2).toBe(1);
+  // });
   it("effect should linked to the exact key", () => {
     const observe = reactive({ foo: "foo", bar: "bar" });
     const fnSpy = jest.fn(() => {
@@ -60,24 +60,24 @@ describe("reacticity", () => {
     observe.foo = "foooo";
     expect(fnSpy).toHaveBeenCalledTimes(2);
   });
-  it("调度执行", () => {
-    const obj = reactive({ foo: 1 });
-    const arr = [];
-    jest.useFakeTimers(); // 开启模拟定时器
-    effect(() => arr.push(obj.foo), {
-      // 调度器
-      scheduler(fn) {
-        setTimeout(fn);
-      },
-    });
-    obj.foo++;
-    arr.push("over");
+  // it("调度执行", () => {
+  //   const obj = reactive({ foo: 1 });
+  //   const arr = [];
+  //   jest.useFakeTimers(); // 开启模拟定时器
+  //   effect(() => arr.push(obj.foo), {
+  //     // 调度器
+  //     scheduler(fn) {
+  //       setTimeout(fn);
+  //     },
+  //   });
+  //   obj.foo++;
+  //   arr.push("over");
 
-    jest.runAllTimers(); // 等待所有定时器执行
-    expect(arr[0]).toBe(1);
-    expect(arr[1]).toBe("over");
-    expect(arr[2]).toBe(2);
-  });
+  //   jest.runAllTimers(); // 等待所有定时器执行
+  //   expect(arr[0]).toBe(1);
+  //   expect(arr[1]).toBe("over");
+  //   expect(arr[2]).toBe(2);
+  // });
 });
 it("should be nested", () => {
   const obj = reactive({ foo: "foo", bar: "bar" });

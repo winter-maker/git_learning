@@ -7,9 +7,9 @@ export function reactive(params) {
       track(target, property);
       return result;
     },
-    set(target, property, receiver) {
-      const result = Reflect.set(target, property, receiver);
-      trigger(target, property);
+    set(target, propKey, value, receiver) {
+      const result = Reflect.set(target, propKey, value, receiver);
+      trigger(target, propKey);
       return result;
     },
     deleteProperty(target, property) {
