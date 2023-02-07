@@ -5,9 +5,10 @@ const bstr = "gugugupa";
 const cstr = "pa";
 const acstr = "pagugupa";
 const abstr = "pagugugugugupa";
+const bbstr = "gugugupagugugupagugugupagugugupa";
 let r;
 let list = [];
-while ((r = reg.exec(abstr))) {
+while ((r = reg.exec(bbstr))) {
   list.push({ type: r[0] });
 }
 list.push({

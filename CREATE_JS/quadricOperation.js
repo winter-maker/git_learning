@@ -14,80 +14,63 @@
  */
 
 /**
+ *
+ * 自增 i++, ++i
+ * <Increase> ::= <Number>"++" | "++"<Number>
+ * 增加括号,优先级最高
+ * <Primary> ::= "(" <Expression> ")" | <Number>
+ *
+ * +，-单目运算
+ * <Unary> ::= <Primary> | "+"<Primary> | '-'<Primary>
+ *
  * + - * /
  * 乘除
- * <MultiplicationExpression> ::= <Number> | <MultiplicationExpression> '/' <Number> | <MultiplicationExpression> '*' <Number>
+ * <MultiplicationExpression> ::= <Unary> | <MultiplicationExpression> '/' <Unary> | <MultiplicationExpression> '*' <Unary>
  * 加减
  * <AdditiveExpression> ::= <MultiplicationExpression> | <AdditiveExpression> '+' <MultiplicationExpression> | <AdditiveExpression> '-' <MultiplicationExpression>
- * <Expression> ::= <MultiplicationExpression> | <AdditiveExpression>
+ * <Expression> ::= <AdditiveExpression>
  *
  *
  * 增加 ||或 &&与 逻辑运算，优先于是最低的，比加减还要低，与比或高
  * LogicAndExpression ::= <AdditiveExpression> | <LogicAndExpression> '&&' <AdditiveExpression>
  * LogicOrExpression ::= <LogicAndExpression> | <LogicOrExpression> '||' <LogicAndExpression>
  *
- *
- * 自增 i++, ++i
- * <Increase> ::= <Number>"++" | "++"<Number>
- *
- * 增加括号
- * <Primary> ::= "(" <Expression> ")" | <Increase>
- * 
- * 单目运算
- * <Unary> ::= <Primary> | "+"<Primary> | '-'<Primary>
- * 
- *  ** 右结合运算符
- * 
- * 乘除
- * <MultiplicationExpression> ::= <Primary> | 
- * <MultiplicationExpression> '/' <Primary> | 
- * <MultiplicationExpression> '*' <Primary>
- * 
- * 加减 closure 
- * <AdditiveExpression> ::= 
- * <MultiplicationExpression> | 
- * <AdditiveExpression> '+' <MultiplicationExpression> | 
- * <AdditiveExpression> '-' <MultiplicationExpression> |
- * <Primary> | 
- * <MultiplicationExpression> '/' <Primary> | 
- * <MultiplicationExpression> '*' <Primary> |
- * "(" <Expression> ")" | 
- * <Number>
- * 
- * <Expression> ::= <MultiplicationExpression> | <AdditiveExpression>
- 
-* 增加 ||或 &&与 逻辑运算，优先于是最低的，比加减还要低，与比或高
- * LogicAndExpression ::= <AdditiveExpression> | <LogicAndExpression> '&&' <AdditiveExpression>
- * LogicOrExpression ::= <LogicAndExpression> | <LogicOrExpression> '||' <LogicAndExpression>
- * 
- * = 是右结合
+ * = 是右结合, a = b = 1 相等于 a = (b = 1)
  * <Assignment> ::= <LogicOrExpression> | <LogicOrExpression>"="<Assignment>
- * 
+ *
+ * ** 幂运算也是右结合运算符
+ *
  * 逗号，优先级最低
- * <ExpressionGroup> ::= <LogicOrExpression> | <ExpressionGroup> ',' <LogicOrExpression>
- * 
+ * <ExpressionGroup> ::= <LogicOrExpression> | <ExpressionGroup>","<LogicOrExpression>
+ *
  * IF
  * <IFExpression> ::= <ExpressionGroup> | "if""("<ExpressionGroup>")"<ExpressionGroup>
  *
  * 分号
- * <SplitExpression> ::= <ExpressionGroup> | <SplitExpression> ';' <ExpressionGroup>
- * 
- * 
+ * <SplitExpression> ::= <ExpressionGroup> | <SplitExpression>";"<ExpressionGroup>
  *
- * <number>数字
- * <addOrMinus> ::= "+" | "-"
- * <multiplicativeOp> ::= "*" | "/"
- * <bracketExpression> ::= <number> | "(" <expression> ")"
- * <multiplicativeExpression> ::= <bracketExpression> | <multiplicativeExpression> <multiplicativeOp> <bracketExpression>
- * <additiveExpression> ::= <multiplicativeExpression> | <additiveExpression> <addOrMinus> <multiplicativeExpression>
- * <logicAndExpression> ::= <additiveExpression> | <logicAndExpression> "&&" <additiveExpression>
- * <logicOrExpression> ::= <logicAndExpression> | <logicOrExpression> "||" <logicAndExpression>
- * <expression> ::= <additiveExpression>
+ *
+ * 乘除
+ * <MultiplicationExpression> ::= <Primary> |
+ * <MultiplicationExpression> '/' <Primary> |
+ * <MultiplicationExpression> '*' <Primary>
+ *
+ * <AdditiveExpression> 的 closure（包含集,首相展开的集合），把每个可能都展开
+ *
+ * <AdditiveExpression> ::=
+ * <AdditiveExpression> '+' <MultiplicationExpression> | addi
+ * <AdditiveExpression> '-' <MultiplicationExpression> | addi
+ * <MultiplicationExpression> | addi
+ * <MultiplicationExpression> '/' <Primary> | mult
+ * <MultiplicationExpression> '*' <Primary> | mult
+ * <Primary> | mult
+ * "(" <Expression> ")" | primary
+ * <Number> primary
+ *
  * **/
 
-let reg =
-  /([1-9][0-9]{0,1}?:(\.[0-9]+){0,1}|0\.[0-9]{1,}|0)|(\+)|(\-)|(\*)|(\/)/g;
-let str = "1+2/3*4";
+let reg = /([1-9][0-9]{0,}(\.[0-9]+){0,1}|0\.[0-9]{1,}|0)|(\+)|(\-)|(\*)|(\/)/g;
+let str = "1*2/3*4";
 let r = null,
   list = [];
 const operatorMap = {};
@@ -97,19 +80,46 @@ while ((r = reg.exec(str))) {
     type: r[1] ? "number" : r[0],
   });
 }
+
 list.push({
   type: "EOF",
 });
 additive(list);
 console.log(JSON.stringify(list, null, 4));
 
-//console.log("--origin--", pick(list[0]));
 // function pick(obj) {
 //   if (["+", "-", "*", "/"].includes(obj.type)) return obj.type;
 //   if (obj.value) return obj.value;
-//   return obj.children.map(pick).join("");
+//   return obj.children.map(pick).join(" ");
 // }
-//加法
+// console.log("origin", pick(list[0]));
+
+// let list2 = [];
+// pick(list[0]);
+// function pick(obj) {
+//   console.log(obj);
+//   obj.children.forEach((ele) => {
+//     if (["+", "-", "*", "/"].includes(ele.type)) {
+//       list2.push({
+//         type: ele.type,
+//       });
+//     } else {
+//       if (ele.children) {
+//         pick(ele.children);
+//       } else {
+//         if (ele.type === "number") {
+//           list2.push({
+//             type: ele.type,
+//             value: ele.value,
+//           });
+//         }
+//       }
+//     }
+//   });
+// }
+//console.log(JSON.stringify(list2, null, 4));
+
+// 加减法
 function additive(list) {
   if (list[0].type === "number") {
     multiplicative(list);
@@ -139,7 +149,8 @@ function additive(list) {
     }
   }
 }
-//乘法
+
+// 乘除法
 function multiplicative(list) {
   if (list[0].type === "number") {
     let mulSymbol = {
@@ -162,6 +173,29 @@ function multiplicative(list) {
       };
       list.splice(0, 3, mulSymbol);
       multiplicative(list);
+    }
+  }
+}
+
+/* 乘除
+ * <MultiplicationExpression> ::= <Number> | <MultiplicationExpression> '/' <Number> | <MultiplicationExpression> '*' <Number>
+ * 加减
+ * <AdditiveExpression> ::=
+ * <MultiplicationExpression> |
+ * <AdditiveExpression> '+' <MultiplicationExpression> |
+ * <AdditiveExpression> '-' <MultiplicationExpression> |
+ * <Primary> |
+ * <MultiplicationExpression> '/' <Primary> |
+ * <MultiplicationExpression> '*' <Primary> |
+ * "(" <Expression> ")" |
+ * <Number>
+ * */
+function expressionParser(list) {
+  if (list[0].type === "number" || list[0].type === "bracket") {
+    bracketExpressionParser(list);
+    expressionParser(list);
+  } else if (list[0].type === "+") {
+    if (list[1].type === "") {
     }
   }
 }

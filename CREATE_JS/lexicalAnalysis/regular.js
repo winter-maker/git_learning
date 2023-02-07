@@ -9,7 +9,7 @@
  * 'abc'.charCodeAt(0) 返回字符串中第0个位置的 unicode 编码
  * String.fromCharCode(127) 返回 unicode 码对应的字符
  * String match的方法,括号分组的作用(?:),嵌套的括号找出来的顺序是按左括号出现的顺序
- * String replacce的方法，第二个参数可以是字符串和函数，函数参数
+ * String replace的方法，第二个参数可以是字符串和函数，函数参数
  * Regular exec的方法
  */
 //}
