@@ -1,21 +1,26 @@
 export function parse(template) {
-  // 上下文
+  // 上下文,
   const context = {
     source: template,
     advance(length) {
       this.source = this.source.slice(length);
     },
-    advanceSpace() {},
+    advanceSpace() {
+      const match = /^[\t\r\n\f ]+/.exec(context.source);
+      if (match) {
+        context.advance(match[0].length);
+      }
+    },
   };
   return parseChildren(context, []);
-  //   return [
-  //     {
-  //       tag: "div",
-  //       type: "Element",
-  //       children: [],
-  //       isUnary: false, // 是否是自闭和标签
-  //     },
-  //   ];
+  // return [
+  //   {
+  //     tag: "div",
+  //     type: "Element",
+  //     children: [],
+  //     isUnary: false, // 是否是自闭和标签
+  //   },
+  // ];
 }
 
 /**
@@ -82,7 +87,28 @@ function parseElement(context, stack) {
   }
   return ele;
 }
-function parseText(context) {}
+function parseText(context) {
+  let endIndex = context.source.length;
+  // 查找<
+  const ltIndex = context.source.indexOf("<");
+  // 查找{{
+  const delimiterIndex = context.source.indexOf("{{");
+  if (ltIndex > -1 && ltIndex < endIndex) {
+    endIndex = ltIndex;
+  }
+  if (delimiterIndex > -1 && delimiterIndex < endIndex) {
+    endIndex = delimiterIndex;
+  }
+  // 截取并消费
+  const content = context.source.slice(0, endIndex);
+
+  //创建文本ast
+  context.advance(content.length);
+  return {
+    type: "Text",
+    content,
+  };
+}
 function parseTag(context, type = "start") {
   // 处理开始、结束标签的正则不同
   const pattern =
@@ -94,10 +120,10 @@ function parseTag(context, type = "start") {
   const tag = match[1];
   // 消费匹配部分
   context.advance(match[0].length);
-  //属性处理props
   // 处理剩余字符串的空格、制表符等
   context.advanceSpace();
-  const props = parseAttrs(context.source);
+  //属性处理props
+  const props = parseAttrs(context);
   //自闭和标签判断，看看是否以 /> 开头
   const isUnary = context.source.startsWith("/>");
   context.advance(isUnary ? 2 : 1);
@@ -105,7 +131,76 @@ function parseTag(context, type = "start") {
     tag,
     type: "Element",
     children: [],
-    //props: []
+    props,
     isUnary, // 是否是自闭和标签
+  };
+}
+function parseAttrs(context) {
+  //const { advance, advanceSpace } = context;
+  const props = [];
+
+  //只要不遇到结束符 /> 或 >,就不断的循环消费模板内容
+  while (!context.source.startsWith(">") && !context.source.startsWith("/>")) {
+    const match = /^[^\t\r\n\f />][^\t\r\n\f />=]*/.exec(context.source);
+    //1、获取属性名称
+    const name = match[0];
+    //2、消费属性名
+    context.advance(name.length + 1);
+    context.advanceSpace();
+    //3、获取属性值
+    let value = "";
+    //4、获取首字符
+    const quote = context.source[0];
+    //5、判断是否是引号
+    const isQuot = quote === "'" || quote === '"';
+    if (isQuot) {
+      //消费头一个引号
+      context.advance(1);
+      //获取下一个引号
+      const index = context.source.indexOf(quote);
+      //截取中间部分
+      if (index > -1) {
+        value = context.source.slice(0, index);
+        // 消费属性值和后面的引号
+        context.advance(value.length + 1);
+      } else {
+        console.error("缺少引号");
+      }
+    } else {
+      const match = /^[^\t\r\n\f >]+/.exec(context.source);
+      value = match[0];
+      context.advance(value.length);
+    }
+
+    //消费属性之间的空格
+    context.advanceSpace();
+    // 存入结果数组
+    props.push({
+      type: "Attribute",
+      name: name,
+      value: value,
+    });
+  }
+  return props;
+}
+
+function parseInterpolation(context) {
+  //消费{{
+  context.advance(2);
+  //找结束 }}
+  const delimiterIndex = context.source.indexOf("}}");
+  // 截取表达式
+  const content = context.source.slice(0, delimiterIndex);
+  //消费内容
+  context.advance(content.length);
+  //消费}}
+  context.advance(2);
+  //构造节点
+  return {
+    type: "Interpolation",
+    content: {
+      type: "Expression",
+      content,
+    },
   };
 }
