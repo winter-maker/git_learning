@@ -6,17 +6,14 @@ export function generate(ast) {
 
 function genNode(ast) {
   // 判断节点类型执行不同生成逻辑
-  if (ast.type === "Element") {
-    // 节点
-    return genElement(ast);
-  } else if (ast.type === "Text") {
-    // 文本
-    return genText(ast);
-  } else if (ast.type === "Interpolation") {
-    // 插值
-    return genText(ast.content);
+  if (ast.type === 'Element') {
+    return genElement(ast)
+  } else if (ast.type === 'Text') {
+    return genText(ast)
+  } else if (ast.type === 'Interpolation') {
+    return genText(ast.content)
   }
-  return "";
+  return ''
 }
 
 function genElement(el) {
@@ -26,8 +23,8 @@ function genElement(el) {
 
   // 属性
   const props = genProps(el);
-
-  // _c(tag,props,children)
+  
+  // _c(tag,props,children) 
   const code = `this._c(${tag},${props}${children ? `,${children}` : ""})`;
   return code;
 }
@@ -43,7 +40,7 @@ function genChildren(el) {
     ) {
       return children[0].type === "Text"
         ? `'${children[0].content}'`
-        : `this.${children[0].content.content}`;
+      : `this.${children[0].content.content}`;
     }
     // 其他情况处理为数组形式：_c('div',null,[_c('span',null,'text')])
     return `[${children.map((c) => genNode(c)).join(",")}]`;

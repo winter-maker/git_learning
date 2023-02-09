@@ -1,28 +1,22 @@
-import { track, trigger, activeEffect } from "./effect";
-/**
- * @title 将params对象变成响应式
- * @param {*} params
- * @returns
- */
-export function reactive(params) {
-  const proxyObj = new Proxy(params, {
-    get(target, property, receiver) {
-      const result = Reflect.get(target, property, receiver);
-      //收集target属性，建立 target 、property 和 activeEffect之间的关系
-      track(target, property);
-      return result;
+import { track, trigger } from "./effect";
+
+// reactive返回传入obj的代理对象，值更新时使app更新
+export function reactive(obj) {
+  return new Proxy(obj, {
+    get(target, key) {
+      const result = Reflect.get(target, key);
+      track(target, key)
+      return result
     },
-    set(target, propKey, value, receiver) {
-      const result = Reflect.set(target, propKey, value, receiver);
-      //触发target属性
-      trigger(target, propKey);
-      list.forEach((fn) => fn());
-      return result;
+    set(target, key, value) {
+      const result = Reflect.set(target, key, value);
+      trigger(target, key)
+      return result
     },
-    deleteProperty(target, property) {
-      const result = Reflect.deleteProperty(target, property);
-      return result;
+    deleteProperty(target, key) {
+      const result = Reflect.deleteProperty(target, key);
+      trigger(target, key)
+      return result
     },
   });
-  return proxyObj;
 }
