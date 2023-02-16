@@ -4,20 +4,23 @@
 </div>
 <script>
   const data = reactive({
-    message: 'Hello Vue 3!!'
-  })
+    message: "Hello Vue 3!!",
+  });
   function reverse() {
-    data.message = data.message.split('').reverse().join('')
+    data.message = data.message.split("").reverse().join("");
   }
-  const template = app.innerHTML
-  const render = compile(template)
-  
+  const template = app.innerHTML;
+  // 编译函数把模板编译成渲染函数
+  const render = compile(template);
+
   // { type: 'div', children: 'foo' }
   // const vnode = render.call(data)
   // renderer.render(vnode, document.getElementById('app'))
 
   effect(() => {
-    const vnode = render.call(data)
-	  renderer.render(vnode, document.getElementById('app'))
-  })
+    // 渲染函数把数据处理成虚拟dom
+    const vnode = render.call(data);
+    // 渲染器把虚拟dom转换成真实dom，挂载到真实dom上
+    renderer.render(vnode, document.getElementById("app"));
+  });
 </script>

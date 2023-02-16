@@ -4,17 +4,17 @@
  * 解释：每个状态都是一个机器，每个state都是一个状态机包含输入、输出、转移关系
  * 有限状态机，状态机是有限的。
  * 分为
- * mealy 状态机，以下就是。
- * moore 状态机，
+ * mealy 状态机，以下就是。return 的东西和输入相关。
+ * moore 状态机，可以在if里面做一下其他处理，return 的只有一个.
  *
  */
 const str = "12345678.9";
 const EOF = Symbol("EOF");
-console.log("result", check(str));
+//console.log("result", check(str));
 function check(str) {
   let state = start;
   for (let c of str.split("").concat(EOF)) {
-    console.log(state.name, c);
+    //console.log(state.name, c);
     state = state(c);
   }
   if (state === success) {
@@ -101,3 +101,56 @@ function success(char) {
 function fail(char) {
   return fail;
 }
+/**
+ * KMP 算法：
+ * 在一个字符串里找另一个字符串
+ * */
+// source pattern，假设pattern 所有字符完全不相同
+function find(source, pattern) {
+  let strArr = source.split("");
+  for (let index = 0; index < strArr.length; index++) {
+    if (source.slice(index, index + pattern.length) === pattern) {
+      return index;
+    }
+  }
+  return -1;
+}
+// 0(m+n)
+function find2(source, pattern) {
+  let currentP = 0;
+  for (let i = 0; i < source.length; i++) {
+    if (source[i] === pattern[currentP]) {
+      if (currentP === pattern.length - 1) return i - currentP;
+      currentP++;
+    } else {
+      currentP = 0;
+    }
+  }
+  return -1;
+}
+
+function find3(source, pattern) {
+  const len = source.length;
+  const len2 = pattern.length;
+  const next = [0, 0, 0, 1, 5];
+  let i = 0,
+    j = 0;
+  for (; i < len; i++) {
+    if (j === len2) return i - len2;
+    if (source[i] === pattern[j]) {
+      j++;
+      continue;
+    } else if (source[i] !== pattern[j]) {
+      j = next[j];
+    }
+  }
+  return -1;
+}
+console.log("-find-", find3("abababc", "ababc"));
+// 假设pattern字符没有重复，写个算法让他做到 m+n
+
+/**
+ * abababc
+ *     ababc
+ *     ^
+ */

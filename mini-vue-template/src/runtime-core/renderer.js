@@ -1,5 +1,5 @@
 import { compile } from "../compiler";
-import { createAppAPI } from "./createAppAPI";
+//import { createAppAPI } from "./createAppAPI";
 import { createVnode as _c, createTextVnode as _v } from "./vnode";
 
 export const Text = Symbol("text");
@@ -14,32 +14,76 @@ export function createRenderer(options) {
     patchProp,
   } = options;
 
-  const patch = (vnode, container) => {
+  const patch = (oldVnode, vnode, container) => {
     const { tag } = vnode;
+    if (oldVnode && oldVnode.tag !== vnode.tag) {
+      unmount(oldVnode);
+      oldVnode = null;
+    }
     if (typeof tag === "string") {
-      // vnode存在，挂载或更新
-      mountElement(vnode, container);
+      if (oldVnode) {
+        //todo
+        patchElement(oldVnode, vnode);
+      } else {
+        // vnode存在，挂载或更新
+        mountElement(vnode, container);
+      }
     } else if (tag === Text) {
-      // 挂载文本
-      const el = (vnode.el = createText(vnode.children));
-      // container.appendChild(el);
-      insert(el, container);
+      if (oldVnode) {
+        //todo
+        setText(oldVnode?.el, vnode.children);
+      } else {
+        // 挂载文本
+        const el = (vnode.el = createText(vnode.children));
+        // container.appendChild(el);
+        insert(el, container);
+      }
     } else if (typeof tag === "object") {
-      // 挂载组件
-      mountComponent(vnode, container);
+      if (oldVnode) {
+        //todo
+      } else {
+        // 挂载组件
+        mountComponent(vnode, container);
+      }
+    }
+  };
+
+  const patchElement = (oldVnode, vnode) => {
+    const el = (vnode.el = oldValue.el);
+    for (const key in vnode.props) {
+      if (vnode.props[key] !== oldVnode.props[key]) {
+        patchProp(el, key, oldVnode.props[key], vnode);
+      }
+    }
+
+    for (const oldKey in oldVnode.props) {
+      const oldValue = oldVnode.props[oldKey];
+      if (!vnode.props.hasOwnProperty(oldKey)) {
+        patchProp(el, oldKey, oldValue.props[oldKey], null);
+      }
     }
   };
 
   // 负责渲染组件内容
   const render = (vnode, container) => {
     if (vnode) {
-      patch(vnode, container);
+      patch(container._vnode, vnode, container);
     } else {
       // vnode不存在，卸载，暂时这么处理
-      container.innerHTML = "";
+      if (container._vnode) {
+        unmount(container._vnode);
+      }
     }
     // 存储vnode，用于下次更新作为oldvnode
     container._vnode = vnode;
+  };
+
+  // 把vnode 从他所在的宿主元素上删除
+  const unmount = (node) => {
+    const father = node.el.parentNode;
+    if (father) {
+      father.removeChild(node.el);
+    }
   };
 
   // 创建元素
@@ -69,7 +113,7 @@ export function createRenderer(options) {
       setElementText(el, vnode.children);
     } else {
       // children为数组，递归暂时调用mountElement，后续需调整
-      vnode.children.forEach((child) => patch(child, el));
+      vnode.children.forEach((child) => patch(null, child, el));
     }
 
     // 插入元素
@@ -95,7 +139,7 @@ export function createRenderer(options) {
     // 执行render获取组件vnode子树
     const subtree = options.render.call(ctx);
     // 向下递归
-    patch(subtree, container);
+    patch(null, subtree, container);
   };
 
   return { render };

@@ -1,4 +1,4 @@
-export const nodeOps = {
+export const nodeOperation = {
   createElement(tag) {
     return document.createElement(tag);
   },
@@ -18,9 +18,17 @@ export const nodeOps = {
     if (/^on/.test(key)) {
       // 事件
       const event = key.slice(2).toLowerCase();
+      if (nextValue) {
+        el.removeEventListener(event, prevValue);
+      }
+
       el.addEventListener(event, nextValue);
     } else {
-      el.setAttribute(key, nextValue);
+      if (nextValue) {
+        el.setAttribute(key, nextValue);
+      } else {
+        el.removeAttribute(key, nextValue);
+      }
     }
   },
 };

@@ -189,7 +189,13 @@ function multiplicative(list) {
  * <MultiplicationExpression> '*' <Primary> |
  * "(" <Expression> ")" |
  * <Number>
+ *
+ * 1、定义产生式
+ * 2、对每个产生式求closure
+ * 3、closure每一行都是一个if
+ *
  * */
+
 function expressionParser(list) {
   if (list[0].type === "number" || list[0].type === "bracket") {
     bracketExpressionParser(list);
