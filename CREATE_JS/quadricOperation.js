@@ -1,5 +1,6 @@
 // 四则运算 加、减、乘、除
 // 数字 和 符号当作非终结符（nonterminalSymbol）
+// 基于产生式进行语法分析
 
 /***
  * BNF 产生式,巴克斯诺尔范式
@@ -20,13 +21,13 @@
  * 增加括号,优先级最高
  * <Primary> ::= "(" <Expression> ")" | <Number>
  *
- * +，-单目运算
+ * +，-单目运算 正负号
  * <Unary> ::= <Primary> | "+"<Primary> | '-'<Primary>
  *
  * + - * /
- * 乘除
+ * 乘除二合一
  * <MultiplicationExpression> ::= <Unary> | <MultiplicationExpression> '/' <Unary> | <MultiplicationExpression> '*' <Unary>
- * 加减
+ * 加减二合一
  * <AdditiveExpression> ::= <MultiplicationExpression> | <AdditiveExpression> '+' <MultiplicationExpression> | <AdditiveExpression> '-' <MultiplicationExpression>
  * <Expression> ::= <AdditiveExpression>
  *
@@ -35,10 +36,11 @@
  * LogicAndExpression ::= <AdditiveExpression> | <LogicAndExpression> '&&' <AdditiveExpression>
  * LogicOrExpression ::= <LogicAndExpression> | <LogicOrExpression> '||' <LogicAndExpression>
  *
- * = 是右结合, a = b = 1 相等于 a = (b = 1)
+ * 所有的运算符都是左结合。
+ * = 是右结合，运算是从左到右, a = b = 1 相等于 a = (b = 1)
  * <Assignment> ::= <LogicOrExpression> | <LogicOrExpression>"="<Assignment>
  *
- * ** 幂运算也是右结合运算符
+ * ** 幂运算也是右结合运算符，优先级高于乘除法
  *
  * 逗号，优先级最低
  * <ExpressionGroup> ::= <LogicOrExpression> | <ExpressionGroup>","<LogicOrExpression>
@@ -48,15 +50,17 @@
  *
  * 分号
  * <SplitExpression> ::= <ExpressionGroup> | <SplitExpression>";"<ExpressionGroup>
- *
- *
+ * 
+ * 
  * 乘除
  * <MultiplicationExpression> ::= <Primary> |
  * <MultiplicationExpression> '/' <Primary> |
  * <MultiplicationExpression> '*' <Primary>
  *
- * <AdditiveExpression> 的 closure（包含集,首相展开的集合），把每个可能都展开
- *
+ * 
+ * 
+ * -----------------------------------------------------------------
+ * <AdditiveExpression> 的 closure（包含集,首相展开的集合），把每个可能都展开。八个分支，3个函数，LL算法的核心
  * <AdditiveExpression> ::=
  * <AdditiveExpression> '+' <MultiplicationExpression> | addi
  * <AdditiveExpression> '-' <MultiplicationExpression> | addi
@@ -66,11 +70,11 @@
  * <Primary> | mult
  * "(" <Expression> ")" | primary
  * <Number> primary
- *
+ * ----------------------------------------------------------------------------
  * **/
 
 let reg = /([1-9][0-9]{0,}(\.[0-9]+){0,1}|0\.[0-9]{1,}|0)|(\+)|(\-)|(\*)|(\/)/g;
-let str = "1*2/3*4";
+let str = "1+2-3*4";
 let r = null,
   list = [];
 const operatorMap = {};
@@ -119,7 +123,12 @@ console.log(JSON.stringify(list, null, 4));
 // }
 //console.log(JSON.stringify(list2, null, 4));
 
-// 加减法
+
+// 加减二合一
+// <AdditiveExpression> ::= 
+// 1、<MultiplicationExpression> | 
+// 2、<AdditiveExpression> '+' <MultiplicationExpression> | 
+// 3、<AdditiveExpression> '-' <MultiplicationExpression>
 function additive(list) {
   if (list[0].type === "number") {
     multiplicative(list);
@@ -152,21 +161,21 @@ function additive(list) {
 
 // 乘除法
 function multiplicative(list) {
-  if (list[0].type === "number") {
+  if (list[0].type === "number") { // 第一个type是number，把第一项转换成{type:'multiplicative',children: []}
     let mulSymbol = {
       children: [...list.slice(0, 1)],
       type: "multiplicative",
     };
     list.splice(0, 1, mulSymbol);
-    multiplicative(list);
-  } else if (list[0].type === "multiplicative") {
+    multiplicative(list); // 继续调乘除法
+  } else if (list[0].type === "multiplicative") { //第一个type是multiplicative
     if (
       list[1].type === "+" ||
       list[1].type === "-" ||
       list[1].type === "EOF"
     ) {
       return;
-    } else {
+    } else { // 如果是乘除继续调用乘除
       let mulSymbol = {
         children: [...list.slice(0, 3)],
         type: "multiplicative",
@@ -181,27 +190,49 @@ function multiplicative(list) {
  * <MultiplicationExpression> ::= <Number> | <MultiplicationExpression> '/' <Number> | <MultiplicationExpression> '*' <Number>
  * 加减
  * <AdditiveExpression> ::=
- * <MultiplicationExpression> |
- * <AdditiveExpression> '+' <MultiplicationExpression> |
- * <AdditiveExpression> '-' <MultiplicationExpression> |
- * <Primary> |
- * <MultiplicationExpression> '/' <Primary> |
- * <MultiplicationExpression> '*' <Primary> |
- * "(" <Expression> ")" |
- * <Number>
+ * <MultiplicationExpression> | addi
+ * <AdditiveExpression> '+' <MultiplicationExpression> | addi
+ * <AdditiveExpression> '-' <MultiplicationExpression> | addi
+ * <Primary> | multi
+ * <MultiplicationExpression> '/' <Primary> | multi
+ * <MultiplicationExpression> '*' <Primary> | multi
+ * "(" <Expression> ")" | primary
+ * <Number> primary
  *
  * 1、定义产生式
  * 2、对每个产生式求closure
  * 3、closure每一行都是一个if
  *
  * */
+function primaryParser(list) { //primary
+  
+}
+function additiveParser(list) { // addi
 
+}
+function mulitplicativeParser(list) { //multi
+
+}
 function expressionParser(list) {
-  if (list[0].type === "number" || list[0].type === "bracket") {
-    bracketExpressionParser(list);
+  if (list[0].type === "number") {
+    primaryParser(list);
     expressionParser(list);
-  } else if (list[0].type === "+") {
-    if (list[1].type === "") {
+  } else if (list[0].type === "addi") {
+    if (list[1].type === "+"|| list[1].type === "-") {
+      additiveParser(list);
+      expressionParser(list);
+    }else if(list[1].type === 'EOF'){
+      return;
     }
+  } else if(list[0].type === 'multi') {
+    if(list[1].type === '*' || list[1].type === '/') {
+      mulitplicativeParser(list);
+    } else {
+      additiveParser(list);
+    }
+    expressionParser(list);
+  } else if(list[0].type === 'primary') {
+    mulitplicativeParser(list);
+    expressionParser(list);
   }
 }

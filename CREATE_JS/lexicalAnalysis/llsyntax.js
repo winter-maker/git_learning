@@ -1,4 +1,9 @@
 // 外星语言， LL语法分析
+/**
+ * a > pagugu
+ * b > gugugupa
+ * c > pa
+*/
 const reg = /(pa|gu)/g;
 const astr = "pagugupagugupagugu";
 const bstr = "gugugupa";

@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "Launch Program",
-      "program": "${workspaceFolder}/stateMachine/index.js",
+      "program": "${workspaceFolder}/lexicalAnalysis/llsyntax.js",
       "request": "launch",
       "skipFiles": ["<node_internals>/**"],
       "type": "node"
