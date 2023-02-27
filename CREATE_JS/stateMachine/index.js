@@ -104,8 +104,10 @@ function fail(char) {
 /**
  * KMP 算法：
  * 在一个字符串里找另一个字符串
+ * 最好的时间复杂度 o(m+n)
  * */
-// source pattern，假设pattern 所有字符完全不相同
+// source 中找 pattern，
+// 暴力查找 o(m*n)
 function find(source, pattern) {
   let strArr = source.split("");
   for (let index = 0; index < strArr.length; index++) {
@@ -115,38 +117,57 @@ function find(source, pattern) {
   }
   return -1;
 }
-// 0(m+n)
+// 暴力查找 o(m*n)
 function find2(source, pattern) {
-  let currentP = 0;
   for (let i = 0; i < source.length; i++) {
-    if (source[i] === pattern[currentP]) {
-      if (currentP === pattern.length - 1) return i - currentP;
-      currentP++;
-    } else {
-      currentP = 0;
+    let k = i;
+    let j = 0;
+    for (; j < pattern.length; j++) {
+      if (source[k] === pattern[j]) {
+        k++;
+      } else {
+        break;
+      }
     }
+    if (j === pattern.length) return i;
   }
   return -1;
 }
 
+// 假设pattern 所有字符完全不相同,实现KMP的中间状态
 function find3(source, pattern) {
   const len = source.length;
   const len2 = pattern.length;
-  const next = [0, 0, 0, 1, 5];
   let i = 0,
     j = 0;
-  for (; i < len; i++) {
+  for (; i < len; i++, j++) {
     if (j === len2) return i - len2;
     if (source[i] === pattern[j]) {
-      j++;
       continue;
-    } else if (source[i] !== pattern[j]) {
-      j = next[j];
+    } else {
+      j = -1;
     }
   }
   return -1;
 }
-console.log("-find-", find3("abababc", "ababc"));
+// function find3(source, pattern) {
+//   const len = source.length;
+//   const len2 = pattern.length;
+//   const next = [0, 0, 0, 1, 5];
+//   let i = 0,
+//     j = 0;
+//   for (; i < len; i++) {
+//     if (j === len2) return i - len2;
+//     if (source[i] === pattern[j]) {
+//       j++;
+//       continue;
+//     } else if (source[i] !== pattern[j]) {
+//       j = next[j];
+//     }
+//   }
+//   return -1;
+// }
+console.log("-find-", find3("abababc", "abc"));
 // 假设pattern字符没有重复，写个算法让他做到 m+n
 
 /**
