@@ -21,6 +21,7 @@ var afterB2 = stateFun('c', success, afterB);
 var afterA2 = stateFun('b', afterB2, afterA);
 var afterB = stateFun('a', afterA2, start);
 var afterA = stateFun('b', afterB, start);
+const states = [start]
 // function afterA(char) {
 //     if(char === 'b') return afterB;
 //     return start(char);
