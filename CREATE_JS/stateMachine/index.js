@@ -104,8 +104,10 @@ function fail(char) {
 /**
  * KMP 算法：
  * 在一个字符串里找另一个字符串，字符串处理的算法
+ * 最好的时间复杂度 o(m+n)
  * */
-// source pattern，假设pattern 所有字符完全不相同
+// source 中找 pattern，
+// 暴力查找 o(m*n)
 // o(m*n)， 暴力匹配
 function blKmp(source, pattern) {
   let strArr = source.split("");
@@ -116,16 +118,22 @@ function blKmp(source, pattern) {
   }
   return -1;
 }
+// 暴力查找 o(m*n)
+function find2(source, pattern) {
 // o(m+n)算法，无重复pattern的搜索
 function patNorepetKmp(source, pattern) {
   let currentP = 0;
   for (let i = 0; i < source.length; i++) {
-    if (source[i] === pattern[currentP]) {
-      if (currentP === pattern.length - 1) return i - currentP;
-      currentP++;
-    } else {
-      currentP = 0;
+    let k = i;
+    let j = 0;
+    for (; j < pattern.length; j++) {
+      if (source[k] === pattern[j]) {
+        k++;
+      } else {
+        break;
+      }
     }
+    if (j === pattern.length) return i;
   }
   return -1;
 }
@@ -136,14 +144,20 @@ function patNorepetKmp(source, pattern) {
  * 00012
  */
 
+// 假设pattern 所有字符完全不相同,实现KMP的中间状态
 // 无重复字符的匹配算法，匹配不到回到0
 export const writeNextKmp = (source, pattern) => {
   const len = source.length;
   const len2 = pattern.length;
   let i = 0,
     j = 0;
+  for (; i < len; i++, j++) {
+    if (j === len2) return i - len2;
   while (i < len) {
     if (source[i] === pattern[j]) {
+      continue;
+    } else {
+      j = -1;
       i++;
       j++;
     } else {
@@ -159,6 +173,25 @@ export const writeNextKmp = (source, pattern) => {
   }
   return -1;
 }
+// function find3(source, pattern) {
+//   const len = source.length;
+//   const len2 = pattern.length;
+//   const next = [0, 0, 0, 1, 5];
+//   let i = 0,
+//     j = 0;
+//   for (; i < len; i++) {
+//     if (j === len2) return i - len2;
+//     if (source[i] === pattern[j]) {
+//       j++;
+//       continue;
+//     } else if (source[i] !== pattern[j]) {
+//       j = next[j];
+//     }
+//   }
+//   return -1;
+// }
+console.log("-find-", find3("abababc", "abc"));
+// 假设pattern字符没有重复，写个算法让他做到 m+n
 
 /**
  * 不重复字符的匹配算法，匹配不到回到next位
