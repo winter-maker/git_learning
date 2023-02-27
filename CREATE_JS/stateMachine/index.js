@@ -103,13 +103,12 @@ function fail(char) {
 }
 /**
  * KMP 算法：
- * 在一个字符串里找另一个字符串，字符串处理的算法
+ * 在一个字符串里找另一个字符串
  * 最好的时间复杂度 o(m+n)
  * */
 // source 中找 pattern，
 // 暴力查找 o(m*n)
-// o(m*n)， 暴力匹配
-function blKmp(source, pattern) {
+function find(source, pattern) {
   let strArr = source.split("");
   for (let index = 0; index < strArr.length; index++) {
     if (source.slice(index, index + pattern.length) === pattern) {
@@ -120,9 +119,6 @@ function blKmp(source, pattern) {
 }
 // 暴力查找 o(m*n)
 function find2(source, pattern) {
-// o(m+n)算法，无重复pattern的搜索
-function patNorepetKmp(source, pattern) {
-  let currentP = 0;
   for (let i = 0; i < source.length; i++) {
     let k = i;
     let j = 0;
@@ -145,30 +141,17 @@ function patNorepetKmp(source, pattern) {
  */
 
 // 假设pattern 所有字符完全不相同,实现KMP的中间状态
-// 无重复字符的匹配算法，匹配不到回到0
-export const writeNextKmp = (source, pattern) => {
+function find3(source, pattern) {
   const len = source.length;
   const len2 = pattern.length;
   let i = 0,
     j = 0;
   for (; i < len; i++, j++) {
     if (j === len2) return i - len2;
-  while (i < len) {
     if (source[i] === pattern[j]) {
       continue;
     } else {
       j = -1;
-      i++;
-      j++;
-    } else {
-      if (j === 0) {
-        i++;
-      } else {
-        j = 0;
-      }
-    }
-    if (j === len2) {
-      return i - len2;
     }
   }
   return -1;
