@@ -8,9 +8,9 @@
  * moore 状态机，可以在if里面做一下其他处理，return 的只有一个.
  *
  */
-const str = "12345678.9";
+const str = "0.123456789";
 const EOF = Symbol("EOF");
-//console.log("result", check(str));
+console.log("result", check(str));
 function check(str) {
   let state = start;
   for (let c of str.split("").concat(EOF)) {
