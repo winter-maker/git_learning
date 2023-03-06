@@ -1,16 +1,14 @@
-const http = require('http');
+const http = require("http");
 
 // Create a local server to receive data from
 const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/html' });
-  res.end(
-    `<h1>Hello World!</h1>`
-  );
+  res.writeHead(200, { "Content-Type": "text/html" });
+  res.end(`<h1>Hello World!!1234</h1>`);
   /**
    * response state line
    * response headers
    * response body
-  */
+   */
 });
 
 server.listen(8000);
@@ -29,4 +27,4 @@ server.listen(8000);
  * 数据链路层
  * 物理层 （网线，wifi等协议）
  *
-*/
+ */
