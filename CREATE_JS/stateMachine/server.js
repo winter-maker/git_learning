@@ -3,8 +3,9 @@ const http = require('http');
 // Create a local server to receive data from
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html' });
+  // Transfer-Encoding: chunked， 十六进制写入的
   res.end(
-    `<h1>Hello World!</h1>`
+    `<h1>Hello World1234!!</h1>`
   );
   /**
    * response state line

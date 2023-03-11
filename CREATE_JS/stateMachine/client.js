@@ -8,6 +8,7 @@ const client = net.createConnection({ port: 8000 }, () => {
 });
 client.on('data', (data) => {
   // data <Buffer类型
+  //console.log('data,--', data)
   parse(data.toString())
   client.end();
 });

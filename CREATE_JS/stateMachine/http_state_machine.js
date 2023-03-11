@@ -12,7 +12,7 @@ module.exports = function parse(source) {
     console.log(source)
     let state = start;
     
-    for (let c of source.split('').concat(EOF)) {
+    for (let c of source.split('')) {
         //console.log(state.name, c);
         state = state(c);
     }
@@ -20,31 +20,34 @@ module.exports = function parse(source) {
 }
 // getStatusCode(char) reconsume
 
+// 得到http版本信息，状态机入口
 function start(char) {
     //console.log('---start---', char)
     if(char === ' ') return getStatusCode;
     response.httpVersion += char;
-    return start;
+    return start; // continue the cycle
 }
 function success() {
     return success;
 }
+// 走到第一个空格，取后面的http状态码
 function getStatusCode(char) {
     if(char === ' ') {
         return getStatusText;
     } else {
         response.statusCode += char; //写时的副作用
         //console.log('---getStatusCode---', char) //console.log 本身就是副作用
-        return getStatusCode;
+        return getStatusCode; // continue the cycle
     }
 }
+// 走到第二个空格，取后面的http状态文本
 function getStatusText(char) {
     if(char === '\r') {
-        return clearlineN;
+        return clearlineN; //遇到\r字符，消灭后面的\n
     } else {
         response.statusText += char;
         //console.log('--getStatusText--', char)//console.log 本身就是副作用
-        return getStatusText
+        return getStatusText // continue the cycle
     }
     
 }
@@ -52,24 +55,27 @@ function clearlineN(char) {
     if(char === '\n') return getHeadersKey
     return error;
 }
+// 取httpHeaders的信息
 function getHeadersKey(char) {
     if(char === ':') return afterHeadersValue;
     currentHeadKey += char;
-    return getHeadersKey;
+    return getHeadersKey; // continue the cycle 
 }
+// 取httpHeaders中key的信息
 function afterHeadersValue(char) {
     if(char !== '') return getHeadersValue;
     return afterHeadersValue;
 }
+// 取httpHeaders中value的信息
 function getHeadersValue(char) {
-    if(char === '\r') {
+    if(char === '\r') {// 读取完一行的httpHeaders，拼接上key/value对，继续下一行
         response.headers[currentHeadKey] = currentHeadValue;
         currentHeadKey = '';
         currentHeadValue = '';
         return clearlineN;
     }
     currentHeadValue += char;
-    return getHeadersValue;
+    return getHeadersValue; // conitue the cycle
 }
 
 function error(){ return error };

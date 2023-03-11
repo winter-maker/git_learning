@@ -4,7 +4,7 @@
   "description": "",
   "main": "quadricOperation.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest __test__/lrsyntax.spec.js --coverage"
   },
   "author": "",
   "license": "ISC",
