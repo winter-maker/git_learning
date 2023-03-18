@@ -15,7 +15,7 @@ let currentHeadKey = "";
 let currentHeadValue = "";
 module.exports = function parse(source) {
     const EOF = Symbol('EOF')
-    console.log(source)
+    //console.log(source, JSON.stringify(source.split(''),null,2))
     let state = start;
     
     for (let c of source.split('')) {
@@ -24,17 +24,7 @@ module.exports = function parse(source) {
     }
     console.log('---response---', response)
 }
-  const EOF = Symbol("EOF");
-  console.log(source);
-  // 十六进制
-  let state = start;
 
-  for (let c of source.split("")) {
-    //console.log(state.name, c);
-    state = state(c);
-  }
-  console.log("---response---", response);
-};
 // getStatusCode(char) reconsume
 
 // 得到http版本信息，状态机入口
@@ -66,7 +56,7 @@ function getStatusText(char) {
         //console.log('--getStatusText--', char)//console.log 本身就是副作用
         return getStatusText // continue the cycle
     }
-    
+
 }
 function clearlineN(char) {
   if (char === "\n") return getHeadersKey;
@@ -74,6 +64,7 @@ function clearlineN(char) {
 }
 // 取httpHeaders的信息
 function getHeadersKey(char) {
+  if(char === '\r') return beforeBody;
     if(char === ':') return afterHeadersValue;
     currentHeadKey += char;
     return getHeadersKey; // continue the cycle 
@@ -96,7 +87,7 @@ function getHeadersValue(char) {
 }
 function beforeBody(char) {
   if (char === "\n") {
-    response.body = new ChunkBodyParser(char);
+    let body = new ChunkBodyParser(char).body;
     return body;
   }
   return beforeBody;
