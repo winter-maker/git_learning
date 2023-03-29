@@ -29,12 +29,14 @@ module.exports = {
     "extends": [
         "eslint:recommended"
     ],
+    // 插件
+    plugins: ['@typescript-eslint','prettier','eslint-plugin-prettier', 'eslint-config-prettier'], // prettier 与eslint整合
     // 自定义规则
     rules: {
         "no-unused-vars": "off",
-        "no-console": "error"
+        "no-console": "error",
+        "prettier/prettier": "error"
     },
-    // 插件
-    plugins: ['@typescript-eslint']
+    
     
 }

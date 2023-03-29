@@ -1,6 +1,6 @@
 <template>
-    <h1>Hello</h1>
+  <h1>Hello</h1>
 </template>
 <script lang="ts">
-    const a : number = 1 
+const a: number = 1;
 </script>
