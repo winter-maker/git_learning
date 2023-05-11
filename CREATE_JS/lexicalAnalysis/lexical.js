@@ -33,5 +33,5 @@ while ((r = reg.exec(str))) {
     console.log("--跳格了", r);
   }
   initIndex = index + value.length;
-  console.log(r.groups);
+  //console.log(r.groups);
 }

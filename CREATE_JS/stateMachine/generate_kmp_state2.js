@@ -36,10 +36,10 @@ export function check(source, pattern) {
         states.push( fn );
     }
     states.push(success);
-    console.log(states)
+    // console.log(states)
     let state = states[0];
     for(let i=0; i<source.length; i++) {
-        console.log(state(source[i]), source[i])
+        // console.log(state(source[i]), source[i])
         state = state(source[i]);
         if(state === success) {
             return i - pattern.length + 1;

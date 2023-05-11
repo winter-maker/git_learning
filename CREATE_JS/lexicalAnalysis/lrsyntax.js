@@ -2,24 +2,26 @@
  * 括号匹配
  * ()[]{}
 */
-// export const isValid = (list)=> {
-//     const n = list.length;
-//     const map = new Map([[')', '('], [']','['], ['}','{']])
-//     const stack = [];
-//     for(let i=0; i<n; i++) {
-//         const char = list[i];
-//         if(map.has(char)) {
-//             //case1: char in map: ) ] }
-//             if(stack.pop() !== map.get(char)) return false;
-//         } else {
-//             //case2: char out map: ( [ {
-//             stack.push(char) // 入栈
-//         }
-//     }
-//     //case3: cycle end
-//     // 有开始没有结束
-//     return stack.length === 0;
-// }
+ const isValid = (list)=> {
+    const n = list.length;
+    const map = new Map([[')', '('], [']','['], ['}','{']])
+    const stack = [];
+    for(let i=0; i<n; i++) {
+        const char = list[i];
+        if(map.has(char)) {
+            //case1: char in map: ) ] }
+            //归约
+            if(stack.pop() !== map.get(char)) return false;
+        } else {
+            //case2: char out map: ( [ {
+            //移入
+            stack.push(char) // 入栈
+        }
+    }
+    //case3: cycle end
+    // 有开始没有结束
+    return stack.length === 0;
+}
 /**
  * 
  * shift, reduce 编译原理里的术语
@@ -57,7 +59,7 @@ function parse(str) {
     });
     expression(list);
 
-    //console.log(JSON.stringify(list, null, 4));
+    console.log(JSON.stringify(list, null, 4));
     return list;
 }
 function expression(list) {
