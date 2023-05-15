@@ -69,7 +69,7 @@ function expression(list) {
         const char = list[i];
         if(char.value === '(') {
             stack.push(char);
-        } else if(char.value === ')') {
+        } else if(char.value === ')') { // reduce
             let child;
             const children = [];
             while((child = stack.pop()).value !== '(') {
@@ -80,7 +80,7 @@ function expression(list) {
                 children
             }
             stack.push(symbol)
-        } else {
+        } else { // shift
             stack.push(char)
         }
     }

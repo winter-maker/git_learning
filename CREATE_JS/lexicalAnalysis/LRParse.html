@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LRParse</title>
+</head>
+<body>
+    <script>
+        const mem = {
+            'Expression': [['AdditiExp']],
+            'AdditiExp': [['MultiExp'], ['AdditiExp', '+', 'MultiExp'], ['AdditiExp','-', 'MultiExp']],
+            'MultiExp': [['Primary'],['MultiExp','*', 'MultiExp'], ['MultiExp', '/', 'MultiExp']],
+            'Primary': [['Number'], ['(', 'Expression', ')']]
+        };
+        function getClosure(symbol) {
+            const rules = [];
+            const dictionary = new Set();
+            const pool = [symbol]; // 广度搜，深度搜的结构
+            while(pool.length !== 0) {
+                const current = pool.pop();
+                mem[current] && mem[current].forEach(newRule => {
+                    //console.log(newRule,current)
+                    rules.push(
+                        {
+                            closure: newRule,
+                            $reduce: current
+                        }
+                    )
+                    const firstSymbol = newRule[0];
+                    if(!dictionary.has( firstSymbol )) {
+                        dictionary.add( firstSymbol );
+                        pool.push( firstSymbol );
+                    }
+                })
+            }
+            return rules;
+        }
+        const initStates = {
+            AdditiExp: { $reduce: 'Expression'}
+        }
+        const extendedState = new Map();
+        function getClosureStates(state) {
+            extendedState.set( JSON.stringify( state ), state )
+            for(let target of Object.keys(state)) {
+                if(target.startsWith('$')) continue;
+                const closures = getClosure(target);
+                //console.log('---target---', target)
+                //console.log('---closures---', closures)
+                closures.forEach((item)=>{
+                    const {closure, $reduce: reduce} = item;
+                    current = state;
+                    closure.forEach(symbol => {
+                        if(!current[symbol]) {
+                            current[symbol] = {}
+                        }
+                        current = current[symbol]
+                    })
+                    current.$reduce = reduce;
+                    current.$count = closure.length;
+                })
+            }
+            for(let target of Object.keys(state)) {
+                if(target.startsWith('$')) continue;
+                if(extendedState.has( JSON.stringify(state[target]) )) {
+                    state[target] = extendedState.get( JSON.stringify( state[target] ) )
+                } else {
+                    getClosureStates(state[target]);
+                };
+                
+            } 
+        }
+        getClosureStates(initStates);
+        console.log('--value--state---', JSON.stringify(initStates, null, 2));
+    </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
  * 看代码 2*3 上有个虚拟的括号
  * 自左向右看 1+(2*3) 上有个虚拟的括号
  * <Expression> 的 closure（包含集,首相展开的集合），把每个可能都展开。八个分支，3个函数，LL算法的核心
- * <Expression> ::=
+ * <Expression> ::= <AdditiExp>
  * <AdditiExp> ::=
  *             <MultiExp> |
  *             <AdditiExp> '+' <MultiExp> |
@@ -18,7 +18,7 @@
  * 
  * <Expression>状态第一个symbol可能是 <MultiExp> | <AdditiExp> | <Primary> | <Number> | "(" <Expression> ")"
  * 第一个移入的是 <Number>    | "(" <Expression> ")"
- * 
+ * 右结合 **, =
 */
 
 // 1、使用数据结构存储这些规则
@@ -43,14 +43,20 @@ const mem = {
     ['(', 'Expression', ')']
 ]
 */
-export function genClosure(symbol) {
+function getClosure(symbol) {
     const rules = [];
     const dictionary = new Set();
     const pool = [symbol]; // 广度搜，深度搜的结构
     while(pool.length !== 0) {
         const current = pool.pop();
         mem[current] && mem[current].forEach(newRule => {
-            rules.push( newRule )
+            //console.log(newRule,current)
+            rules.push(
+                {
+                    closure: newRule,
+                    $reduce: current
+                }
+            )
             const firstSymbol = newRule[0];
             if(!dictionary.has( firstSymbol )) {
                 dictionary.add( firstSymbol );
@@ -60,7 +66,7 @@ export function genClosure(symbol) {
     }
     return rules;
 }
-
+//console.log(getClosure('Expression'))
 // 右结合运算符： ** , =
 /**
  * 根据产生式closure判断是否可以移入
@@ -75,14 +81,15 @@ export function genClosure(symbol) {
  * 5、additiexp后有加号，可以移入。
  * 6、又来一个number, 求 <AdditiExp> '+' <MultiExp> 的 closure
  * ...
- * 最后一定要有一个EOF符号，用来判断是否可以最终规约，如果没有EOF,那么报错： Unexpected End
+ * 最后一定要有一个EOF符号，用来判断是否可以最终规约，如果没有EOF,
+ * 那么报错： Unexpected End
  */
 // 用状态机处理以上分析过程
 const states = {
     '(': {
         // 预先需要处理，防止死循环
         Expression: {
-            ')': {
+            ')': { 
                 $reduce: 'Primary'
             }
         }
@@ -124,14 +131,42 @@ const states = {
 const initStates = {
     AdditiExp: { $reduce: 'Expression'}
 }
+const extendedState = new Map();
 /**
- * 
  * @param {object} state 
  */
 function getClosureStates(state) {
-
+    extendedState.set( JSON.stringify( state ), state )
+    for(let target of Object.keys(state)) {
+        if(target.startsWith('$')) continue;
+        const closures = getClosure(target);
+        //console.log('---target---', target)
+        //console.log('---closures---', closures)
+        closures.forEach((item)=>{
+            const {closure, $reduce: reduce} = item;
+            let current = state;
+            closure.forEach(symbol => {
+                if(!current[symbol]) {
+                    current[symbol] = {}
+                }
+                current = current[symbol]; 
+            })
+            current.$reduce = reduce;
+            current.$count = closure.length;
+        })
+    }
+    for(let target of Object.keys(state)) {
+        if(target.startsWith('$')) continue;
+        if(extendedState.has( JSON.stringify(state[target]) )) {
+            state[target] = extendedState.get( JSON.stringify( state[target] ) )
+        } else {
+            getClosureStates(state[target]);
+        };
+        
+    } 
 }
-
+getClosureStates(initStates);
+console.log('--value--state---', JSON.stringify(initStates, null, 2));
 // 求closoure, 生成状态机的序列
 function genState(symbols) {
     const states = [];
