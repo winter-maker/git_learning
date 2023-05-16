@@ -57,31 +57,39 @@ function parse(str) {
     list.push({
         type: "EOF",
     });
-    expression(list);
+    expressionParse(list);
 
-    console.log(JSON.stringify(list, null, 4));
+    //console.log(JSON.stringify(list, null, 4));
     return list;
 }
-function expression(list) {
+function expressionParse(list) {
     let len = list.length;
-    let stack = [];
+    let stack = []; // 生成树
+    // 维护state 和 多次reduce的逻辑
+    function shift(symbol) {
+        stack.push( symbol )
+    }
+    // 把识别( 改成接受state的指导
+    function reduce() {
+        let child;
+        const children = [];
+        while((child = stack.pop()).value !== '(') {
+            children.unshift(child);
+        }
+        const symbol = {
+            type: null,
+            children
+        }
+        stack.push(symbol)
+    }
     for(let i=0; i<len; i++) {
         const char = list[i];
         if(char.value === '(') {
             stack.push(char);
-        } else if(char.value === ')') { // reduce
-            let child;
-            const children = [];
-            while((child = stack.pop()).value !== '(') {
-                children.unshift(child);
-            }
-            const symbol = {
-                type: null,
-                children
-            }
-            stack.push(symbol)
-        } else { // shift
-            stack.push(char)
+        } else if(char.value === ')') { // reduce，归约把其中的几个合到一起然后push到stack里面
+            reduce();
+        } else { // shift，移入是把一个新的东西push到stack
+            shift(char)
         }
     }
     console.log(JSON.stringify(stack[0], null, 4))

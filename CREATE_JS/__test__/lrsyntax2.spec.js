@@ -1,7 +1,7 @@
-import { genClosure } from '../lexicalAnalysis/lrsyntax2.js';
-describe('Test genClosure', ()=> {
+import { getClosure, getClosureStates, expressionPrimary } from '../lexicalAnalysis/lrsyntax2.js';
+describe('Test getClosure', ()=> {
     test('expression', ()=> {
-        const res = genClosure('Expression')
+        const res = getClosure('Expression')
         expect(JSON.stringify(res)).toBe(JSON.stringify([
             ['AdditiExp'],
             ['MultiExp'],
@@ -13,6 +13,27 @@ describe('Test genClosure', ()=> {
             ['Number'],
             ['(', 'Expression', ')']
         ]))
+    })
+    // test('getClosureStates', ()=>{
+    //     const initStates = {
+    //         AdditiExp: { $reduce: 'Expression'}
+    //     }
+    //     expect(JSON.stringify(getClosureStates(initStates))).toBe(
+    //         [
+    //             ['AdditiExp'],
+    //             ['MultiExp'],
+    //             ['AdditiExp', '+', 'MultiExp'],
+    //             ['AdditiExp','-', 'MultiExp'],
+    //             ['Primary'],
+    //             ['MultiExp','*', 'MultiExp'],
+    //             ['MultiExp', '/', 'MultiExp'],
+    //             ['Number'],
+    //             ['(', 'Expression', ')']
+    //         ]
+    //     )
+    // })
+    test('expressionPrimary', ()=>{
+        expect(expressionPrimary('(1+(2*3))')).toBe(false)
     })
     /***
      * 设计一个单侧可以检测循环对象的结构是否相等。
