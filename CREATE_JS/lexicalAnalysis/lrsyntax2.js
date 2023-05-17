@@ -27,7 +27,7 @@ let str = "1+2*3+2";
 const mem = {
     'Expression': [['AdditiExp']],
     'AdditiExp': [['MultiExp'], ['AdditiExp', '+', 'MultiExp'], ['AdditiExp','-', 'MultiExp']],
-    'MultiExp': [['Primary'],['MultiExp','*', 'MultiExp'], ['MultiExp', '/', 'MultiExp']],
+    'MultiExp': [['Primary'],['MultiExp','*', 'Primary'], ['MultiExp', '/', 'Primary']],
     'Primary': [['Number'], ['(', 'Expression', ')']]
 };
 /*
@@ -43,7 +43,7 @@ const mem = {
     ['(', 'Expression', ')']
 ]
 */
-export function getClosure(symbol) {
+function getClosure(symbol) {
     const rules = [];
     const dictionary = new Set();
     const pool = [symbol]; // 广度搜，深度搜的结构
@@ -135,7 +135,7 @@ const extendedState = new Map();
 /**
  * @param {object} state 
  */
-export function getClosureStates(state) {
+function getClosureStates(state) {
     extendedState.set( JSON.stringify( state ), state )
     for(let target of Object.keys(state)) {
         if(target.startsWith('$')) continue;
@@ -164,56 +164,134 @@ export function getClosureStates(state) {
         };
         
     } 
+    return state;
 }
 //getClosureStates(initStates);
 //console.log('--value--state---', JSON.stringify(initStates, null, 2));
 
-export function expressionPrimary(list) {
-    let state = initStates;
-    let len = list.length;
-    let stateStack = [initStates];
-    //getClosureStates(initStates);
-    let stack = [];
+// function expressionPrimary(list) {
+    
+//     const initStates = {
+//         Expression: { EOF: {
+//             $finished: true
+//         }},
+//         AdditiExp: { $reduce: 'Expression'}
+//     }
+//     let stateStack = [initStates];
+    
+//     let stack = [];
 
-    function shift(symbol) {
-        while(!state[symbol.type]) {
+//     // 根据产生式求得closure
+//     getClosureStates(initStates);
+
+//     function shift(symbol) {
+//         while(!stateStack[stateStack.length - 1][symbol.type] && 
+//             stateStack[stateStack.length - 1].$reduce) {
+//             reduce();
+//         }
+//         stack.push( symbol );
+//         stateStack.push ( stateStack[stateStack.length - 1][symbol.type] );
+//     }
+//     // 把识别 ( 改成接受state的指导
+//     // 直接操作stack, 根据state去操作stack,归约是把stack里的几个symbol合到一起，最后push到stack里
+//     function reduce() { //根据state操作stack
+//         const children = [];
+//         const current = stateStack[stateStack.length - 1]
+//         const count = current.$count;
+//         for(let i=0; i< count; i++) {
+//             children.push( stack.pop() );
+//             // 操作stack的同时也要操作state的栈
+//             stateStack.pop();
+//         }
+//         const token = {
+//             type: current.$reduce,
+//             children
+//         }
+//         shift(token)
+//     }
+
+
+// }
+
+
+const express = '(1+(2*3))';
+// 对表达式进行词法分析,生成list。
+const lexAnalyFun = ()=> {
+    let reg = /(?<Number>[1-9][0-9]{0,}(\.[0-9]+){0,1}|0\.[0-9]{1,}|0)|(?<AdditiExp>[\+\-])|(?<MultiExp>[\*\/])|(?<left>\()|(?<right>\))/g;
+    
+    let r = null,
+    list = [];
+    while ((r = reg.exec(str))) {
+        for(let key in r.groups) {
+            if(r.groups[key] === undefined) {
+                delete r.groups[key]
+            }
+        }
+        list.push({
+            value: Object.values(r.groups)[0],
+            type: Object.keys(r.groups)[0],
+        });
+    }
+
+    list.push({
+        type: "EOF",
+    });
+
+    return list;
+}
+const list = lexAnalyFun(express);
+console.log('---词法分析---', JSON.stringify(list, null, 4));
+// 对List移入和归约，生成ast语法树
+const expressionParse = (list)=> {
+
+    const initStates = {
+        Expression: { EOF: {
+            $finish: true
+        }},
+        AdditiExp: { $reduce: 'Expression'}
+    }
+    let stateStack = [initStates];
+    
+    
+    // 根据产生式求得closure
+    getClosureStates(initStates);
+
+    let stack = []; // 生成树
+
+    // 维护state 和 多次reduce的逻辑
+    const shift = (symbol)=> {
+        while(!stateStack[stateStack.length - 1][symbol.type] && 
+            stateStack[stateStack.length - 1].$reduce) {
             reduce();
         }
-        state = state[symbol.type]; // 移入下一个state
         stack.push( symbol );
-        stateStack.push ( symbol );
+        stateStack.push ( stateStack[stateStack.length - 1][symbol.type] );
     }
-    // 把识别 ( 改成接受state的指导
+    // 把识别( 改成接受state的指导
     // 直接操作stack, 根据state去操作stack,归约是把stack里的几个symbol合到一起，最后push到stack里
-    function reduce() { //根据state操作stack
+    const reduce = ()=> {
         const children = [];
-        for(let i=0; i<state.$count; i++) {
+        const current = stateStack[stateStack.length - 1]
+        const count = current.$count;
+        for(let i=0; i< count; i++) {
             children.push( stack.pop() );
             // 操作stack的同时也要操作state的栈
             stateStack.pop();
         }
         const token = {
-            type: state.$reduce,
+            type: current.$reduce,
             children
         }
         shift(token)
     }
-
-    for(let i=0; i<len; i++) {
-        const symbol = list[i];
-        const nextState = state[symbol.type];
-        
-        if(nextState) { // 如果有 nextState, 那就移入 shift
-            shift(symbol);
-
-        } else { // reduce
-            
-            reduce()
-        }
+    for(let symbol of list) {
+        shift( symbol )
     }
-    console.log(JSON.stringify(stack[0], null, 4))
+    return stack[0];
 }
+const ast = expressionParse(list);
 
+console.log('---ast---', JSON.stringify(ast, null, 4));
 // 求closoure, 生成状态机的序列
 function genState(symbols) {
     const states = [];

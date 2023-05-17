@@ -33,7 +33,25 @@ describe('Test getClosure', ()=> {
     //     )
     // })
     test('expressionPrimary', ()=>{
-        expect(expressionPrimary('(1+(2*3))')).toBe(false)
+        expect( JSON.stringify(expressionPrimary('(1+(2*3))'))).toBe(
+            JSON.stringify([
+                {
+                    type: 'Expression',
+                    children: [
+                        {type: 'Number', value: 1},
+                        {type: '+', value: '+'},
+                        {
+                            type: '',
+                            children: [
+                                {type: 'Number', value: 2},
+                                {type: '*', value: '*'},
+                                {type: 'Number', value: 3}
+                            ]
+                        }
+                    ]
+                }
+            ])
+        )
     })
     /***
      * 设计一个单侧可以检测循环对象的结构是否相等。

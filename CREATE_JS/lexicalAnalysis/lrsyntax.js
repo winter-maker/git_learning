@@ -59,7 +59,7 @@ function parse(str) {
     });
     expressionParse(list);
 
-    //console.log(JSON.stringify(list, null, 4));
+    console.log('--list--',JSON.stringify(list, null, 4));
     return list;
 }
 function expressionParse(list) {
@@ -92,5 +92,5 @@ function expressionParse(list) {
             shift(char)
         }
     }
-    console.log(JSON.stringify(stack[0], null, 4))
+    console.log('---移入归约---',JSON.stringify(stack[0], null, 4))
 }
