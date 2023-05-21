@@ -2,7 +2,7 @@
  * 括号匹配
  * ()[]{}
 */
- const isValid = (list)=> {
+const isValid = (list)=> {
     const n = list.length;
     const map = new Map([[')', '('], [']','['], ['}','{']])
     const stack = [];
@@ -11,6 +11,7 @@
         if(map.has(char)) {
             //case1: char in map: ) ] }
             //归约
+            //console.log(stack.pop() !== map.get(char))
             if(stack.pop() !== map.get(char)) return false;
         } else {
             //case2: char out map: ( [ {
@@ -22,6 +23,7 @@
     // 有开始没有结束
     return stack.length === 0;
 }
+
 /**
  * 
  * shift, reduce 编译原理里的术语
@@ -29,8 +31,8 @@
  * lr shift 移入从左到右， reduce 归约从右到左
  * lr 语法分析
  * 四则运算
- * 乘除二合一： <Multi>::= <Number> | '('+ <Number>'*'<Multi> +')' | '('+ <Number>'/'<Multi> + ')'
- * 加减二合一： <Addti>::= <Multi> | '('+ <Multi>'+'<Addti> +')' | '('+ <Multi>'-'<Addti> +')'
+ * 乘除二合一： <Multiplacation>::= <Number> | '('+ <Number>'*'<Multiplacation> +')' | '('+ <Number>'/'<Multiplacation> + ')'
+ * 加减二合一： <Addtiplacation>::= <Multiplacation> | '('+ <Multiplacation>'+'<Addtiplacation> +')' | '('+ <Multiplacation>'-'<Addtiplacation> +')'
  * (1+(2*3))
 */
 let str = "((1+2)*(3/4)-1-1+(2-1))";
@@ -59,7 +61,7 @@ function parse(str) {
     });
     expressionParse(list);
 
-    console.log('--list--',JSON.stringify(list, null, 4));
+    //console.log('--list--',JSON.stringify(list, null, 4));
     return list;
 }
 function expressionParse(list) {
@@ -92,5 +94,5 @@ function expressionParse(list) {
             shift(char)
         }
     }
-    console.log('---移入归约---',JSON.stringify(stack[0], null, 4))
+    console.log('---移入归约---',JSON.stringify(stack, null, 4))
 }

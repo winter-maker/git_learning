@@ -37,8 +37,8 @@ const mem = {
     ['AdditiExp', '+', 'MultiExp'],
     ['AdditiExp','-', 'MultiExp'],
     ['Primary'],
-    ['MultiExp','*', 'MultiExp'],
-    ['MultiExp', '/', 'MultiExp'],
+    ['MultiExp','*', 'Primary'],
+    ['MultiExp', '/', 'Primary'],
     ['Number'],
     ['(', 'Expression', ')']
 ]
@@ -49,15 +49,15 @@ function getClosure(symbol) {
     const pool = [symbol]; // 广度搜，深度搜的结构
     while(pool.length !== 0) {
         const current = pool.pop();
-        mem[current] && mem[current].forEach(newRule => {
+        mem[current] && mem[current].forEach(closure => {
             //console.log(newRule,current)
             rules.push(
                 {
-                    closure: newRule,
+                    closure: closure,
                     $reduce: current
                 }
             )
-            const firstSymbol = newRule[0];
+            const firstSymbol = closure[0];
             if(!dictionary.has( firstSymbol )) {
                 dictionary.add( firstSymbol );
                 pool.push( firstSymbol );
@@ -90,41 +90,41 @@ const states = {
         // 预先需要处理，防止死循环
         Expression: {
             ')': { 
-                $reduce: 'Primary'
+                $reduce: 'Primary' // ( Expression ) => Primary
             }
         }
     },
     Number: {
-        $reduce: 'Primary'
+        $reduce: 'Primary' // Number => Primary
     },
     Primary: {
-        $reduce: 'MultiExp'
+        $reduce: 'MultiExp' // Primary => MultiExp
     },
     MultiExp: {
         '*': {
             Primary: {
-                $reduce: 'MultiExp'
+                $reduce: 'MultiExp' // MultiExp * Primary => MultiExp
             } 
         },
         '/': {
             Primary: {
-                $reduce: 'MultiExp'
+                $reduce: 'MultiExp' // MultiExp / Primary => MultiExp
             } 
         },
-        $reduce: 'AdditiExp'
+        $reduce: 'AdditiExp' // MultiExp => AdditiExp
     },
     AdditiExp: {
         '+': {
             MultiExp: {
-                $reduce: 'AdditiExp'
+                $reduce: 'AdditiExp' // AdditiExp + MultiExp => AdditiExp
             },
         },
         '-': {
             MultiExp: {
-                $reduce: 'AdditiExp'
+                $reduce: 'AdditiExp' // AdditiExp - MultiExp => AdditiExp
             },
         },
-        $reduce: 'Expresson'
+        $reduce: 'Expresson' // AdditiExp => Expression
     }
 }
 
@@ -239,8 +239,8 @@ const lexAnalyFun = ()=> {
 
     return list;
 }
-const list = lexAnalyFun(express);
-console.log('---词法分析---', JSON.stringify(list, null, 4));
+//const list = lexAnalyFun(express);
+//console.log('---词法分析---', JSON.stringify(list, null, 4));
 // 对List移入和归约，生成ast语法树
 const expressionParse = (list)=> {
 
@@ -289,9 +289,9 @@ const expressionParse = (list)=> {
     }
     return stack[0];
 }
-const ast = expressionParse(list);
+//const ast = expressionParse(list);
 
-console.log('---ast---', JSON.stringify(ast, null, 4));
+//console.log('---ast---', JSON.stringify(ast, null, 4));
 // 求closoure, 生成状态机的序列
 function genState(symbols) {
     const states = [];
