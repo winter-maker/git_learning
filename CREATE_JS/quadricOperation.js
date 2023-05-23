@@ -4,14 +4,9 @@
 
 /***
  * BNF 产生式,巴克斯诺尔范式
- * <additive> ::= '+'
- * <reduce> ::= '-'
- * <ride> ::= '*'
- * <except> ::= '/'
- * <symbol> ::= <additive> | <reduce> | <ride> | <except>
- * <number> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
- * <expression> ::= <number> <symbol> <expression>
- * <language> ::= <expression>+
+ * 
+ * <MultiplicationExpression> ::= <Number> | <MultiplicationExpression> '*' <Number> | <MultiplicationExpression> '/' <Number>
+ * <AdditiveExpression> ::= <MultiplicationExpression> | <MultiplicationExpression> '+' <AdditiveExpression> | <MultiplicationExpression> '-' <AdditiveExpression>
  */
 
 /**
@@ -57,8 +52,6 @@
  * <MultiplicationExpression> '/' <Primary> |
  * <MultiplicationExpression> '*' <Primary>
  *
- * 
- * 
  * -----------------------------------------------------------------
  * <AdditiveExpression> 的 closure（包含集,首相展开的集合），把每个可能都展开。八个分支，3个函数，LL算法的核心
  * <AdditiveExpression> ::=
@@ -74,11 +67,12 @@
  * **/
 
 let reg = /([1-9][0-9]{0,}(\.[0-9]+){0,1}|0\.[0-9]{1,}|0)|(\+)|(\-)|(\*)|(\/)/g;
-let str = "1+2-3*4";
+let str = "1+2-3*4/6";
 let r = null,
   list = [];
 const operatorMap = {};
 while ((r = reg.exec(str))) {
+  //console.log('---r---',r)
   list.push({
     value: r[1],
     type: r[1] ? "number" : r[0],

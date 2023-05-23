@@ -5,15 +5,19 @@
  * c > pa
 */
 const reg = /(pa|gu)/g;
-const astr = "pagugupagugupagugu";
-const bstr = "gugugupa";
+const str = 'pagugugugupa';
+const astr = 'pagugu';
+const aastr = 'pagugupagugu';
+const aaastr = "pagugupagugupagugu";
 const cstr = "pa";
 const acstr = "pagugupa";
 const abstr = "pagugugugugupa";
-const bbstr = "gugugupagugugupagugugupagugugupa";
+const bstr = "gugugupa";
+const bbstr = "gugugupagugugupa";
+const bbbstr = "gugugupagugugupagugugupa";
 let r;
 let list = [];
-while ((r = reg.exec(bbstr))) {
+while ((r = reg.exec(abstr))) {
   list.push({ type: r[0] });
 }
 list.push({
@@ -22,6 +26,7 @@ list.push({
 abc(list);
 console.log(JSON.stringify(list, null, 4));
 
+// 处理pagugu
 function a(list) {
   if (list[1].type === "gu" && list[2].type === "gu") {
     const symbol = {
@@ -30,6 +35,7 @@ function a(list) {
     symbol.children = list.splice(0, 3, symbol);
   }
 }
+// 处理gugugupa
 function b(list) {
   if (list[1].type === "gu" && list[2].type === "gu" && list[3].type === "pa") {
     const symbol = {
@@ -38,12 +44,18 @@ function b(list) {
     symbol.children = list.splice(0, 4, symbol);
   }
 }
+// 处理pa
 function c(list) {
   const symbol = {
     type: "c",
   };
   symbol.children = list.splice(0, 1, symbol);
 }
+// a ::= 'pa''gu''gu'
+// b ::= 'gu''gu''gu''pa'
+// c ::= 'pa'
+// abc ::= <a>+ | <b>+ | <a>+<b>+ | <a>*<c><b>*
+
 //<abc> ::= <a>+ | <b>+ | <a><c><b> | <a>+<b>+
 //<blist> ::= <b> | <b><blist>
 //<alist> ::= <a> | <a><alist>
