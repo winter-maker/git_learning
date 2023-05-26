@@ -14,7 +14,7 @@ console.log("result", check(str));
 function check(str) {
   let state = start;
   for (let c of str.split("").concat(EOF)) {
-    //console.log(state.name, c);
+    console.log(state.name, c);
     state = state(c);
   }
   if (state === success) {

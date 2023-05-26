@@ -16,7 +16,7 @@
  * 增加括号,优先级最高
  * <Primary> ::= "(" <Expression> ")" | <Number>
  *
- * +，-单目运算 正负号
+ * +，-单目运算符 正负号
  * <Unary> ::= <Primary> | "+"<Primary> | '-'<Primary>
  *
  * + - * /
@@ -66,56 +66,38 @@
  * ----------------------------------------------------------------------------
  * **/
 
-let reg = /([1-9][0-9]{0,}(\.[0-9]+){0,1}|0\.[0-9]{1,}|0)|(\+)|(\-)|(\*)|(\/)/g;
-let str = "1+2-3*4/6";
+let reg = /(?<number>[1-9][0-9]{0,}(\.[0-9]+){0,1}|0\.[0-9]{1,}|0)|(?<operator>\+|\-|\*|\/)|(?<primary>\(|\))/g;
+let str = "1+(2-3)*4/6";
 let r = null,
   list = [];
 const operatorMap = {};
 while ((r = reg.exec(str))) {
-  //console.log('---r---',r)
+  let {0: value} = r;
+  let {number, primary, bracket} = r.groups;
+  //console.log(r)
+  //console.log('---r.groups---',r.groups)
   list.push({
-    value: r[1],
-    type: r[1] ? "number" : r[0],
+    value,
+    type: value
+    //type: (number && 'number') || (primary && 'primary') || (bracket && 'bracket')
   });
 }
 
 list.push({
   type: "EOF",
 });
-additive(list);
+//additive(list);
+
 console.log(JSON.stringify(list, null, 4));
 
-// function pick(obj) {
-//   if (["+", "-", "*", "/"].includes(obj.type)) return obj.type;
-//   if (obj.value) return obj.value;
-//   return obj.children.map(pick).join(" ");
-// }
-// console.log("origin", pick(list[0]));
+// 把树状结构遍历成表达式字符串
+function pick(obj) {
+  if (["+", "-", "*", "/"].includes(obj.type)) return obj.type;
+  if (obj.value) return obj.value;
+  return obj.children.map(pick).join("");
+}
+//console.log("origin", pick(list[0]));
 
-// let list2 = [];
-// pick(list[0]);
-// function pick(obj) {
-//   console.log(obj);
-//   obj.children.forEach((ele) => {
-//     if (["+", "-", "*", "/"].includes(ele.type)) {
-//       list2.push({
-//         type: ele.type,
-//       });
-//     } else {
-//       if (ele.children) {
-//         pick(ele.children);
-//       } else {
-//         if (ele.type === "number") {
-//           list2.push({
-//             type: ele.type,
-//             value: ele.value,
-//           });
-//         }
-//       }
-//     }
-//   });
-// }
-//console.log(JSON.stringify(list2, null, 4));
 
 
 // 加减二合一
@@ -180,18 +162,17 @@ function multiplicative(list) {
   }
 }
 
-/* 乘除
- * <MultiplicationExpression> ::= <Number> | <MultiplicationExpression> '/' <Number> | <MultiplicationExpression> '*' <Number>
- * 加减
- * <AdditiveExpression> ::=
- * <MultiplicationExpression> | addi
+/* 
+ * <Expression> ::=
+ * <AdditiveExpression> <EOF> expression
  * <AdditiveExpression> '+' <MultiplicationExpression> | addi
  * <AdditiveExpression> '-' <MultiplicationExpression> | addi
- * <Primary> | multi
+ * <MultiplicationExpression> | addi
  * <MultiplicationExpression> '/' <Primary> | multi
  * <MultiplicationExpression> '*' <Primary> | multi
- * "(" <Expression> ")" | primary
- * <Number> primary
+ * <primary> | multi
+ * <Number> | primary
+ * "(" <Expression> ")" primary
  *
  * 1、定义产生式
  * 2、对每个产生式求closure
@@ -205,10 +186,23 @@ function additiveParser(list) { // addi
 
 }
 function mulitplicativeParser(list) { //multi
-
+  if(list[0].type === "number") {
+    let multiplicative = {
+      type: 'multiplicative'
+    }
+    multiplicative.children = list.splice(0, 1, multiplicative);
+    mulitplicativeParser(list);
+  } else if(list[0].type === "multiplicative") {
+    if(['+', '-', 'EOP'].includes(list[1].type)) {
+      return;
+    } else {
+      
+    }
+  }
 }
 function expressionParser(list) {
-  if (list[0].type === "number") {
+  if (list[0].type === "number" ||
+    list[0].type === "primary") {
     primaryParser(list);
     expressionParser(list);
   } else if (list[0].type === "addi") {

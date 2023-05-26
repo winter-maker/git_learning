@@ -4,7 +4,7 @@
  * 最好的时间复杂度 o(m+n)
  * */
 // source 中找 pattern，
-// 暴力查找 o(m*n)
+// 暴力查找 时间复杂度：o(m*n)
 function find(source, pattern) {
     let strArr = source.split("");
     for (let index = 0; index < strArr.length; index++) {
@@ -14,8 +14,9 @@ function find(source, pattern) {
     }
     return -1;
 }
+// console.log("-find-", find("abababc", "ababc")
 // 暴力查找 o(m*n)
-function find2(source, pattern) {
+function find1(source, pattern) {
     for (let i = 0; i < source.length; i++) {
         let k = i;
         let j = 0;
@@ -30,6 +31,42 @@ function find2(source, pattern) {
     }
     return -1;
 }
+// console.log("-find1-", find1("abababc", "ababc"));
+
+/**
+ * 假设pattern不会重复
+ * 时间复杂度 O(m+n)
+ * 单层循环
+*/
+const find2 = (source, pattern) => {
+    let current = 0;
+    for(let i=0; i<source.length; i++) {
+        if(source[i] == pattern[current]) {
+            if(current == pattern.length -1) return i - current;
+            current++;
+        } else {
+            current = 0;
+        }
+    }
+    return -1;
+}
+//console.log("-find2-", find2("abcdefg", "cde"));
+// 当pattern中有重复的字符，该算法不行，错误的根源在于current=0。
+console.log("-find2-", find2("abababc", "ababc"));
+const find22 = (source, pattern) => {
+    let current = 0;
+    const next = [0,0,0,1,2]
+    for(let i=0; i<source.length; i++) {
+        if(source[i] == pattern[current]) {
+            if(current == pattern.length -1) return i - current;
+            current++;
+        } else {
+            current = next[current];
+        }
+    }
+    return -1;
+}
+console.log("-find22-", find22("abababc", "ababc"));
 /**
  * ababc
  *   ababc
@@ -38,7 +75,7 @@ function find2(source, pattern) {
  */
 
 // 假设pattern 所有字符完全不相同,实现KMP的中间状态
-export const find3 = (source, pattern) => {
+const find3 = (source, pattern) => {
     const len = source.length;
     const len2 = pattern.length;
     // 因为不是每次都是i自增，所以用while
@@ -58,9 +95,9 @@ export const find3 = (source, pattern) => {
     }
     return -1;
 }
-//console.log("-find-", find3("abababc", "ababc"));
+
 // 假设pattern字符没有重复，写个算法让他做到 m+n
-export const handKmp = (source, pattern) => {
+const handKmp = (source, pattern) => {
     const len = source.length;
     const len2 = pattern.length;
     const next = [0, 0, 0, 1, 2]
@@ -140,7 +177,7 @@ function getNext(next, pattern) {
     }
 }
 
-export const generateNextKmp = (source, pattern) => {
+const generateNextKmp = (source, pattern) => {
     const len = source.length;
     const len2 = pattern.length;
     //const next = generateNext(pattern);
@@ -165,7 +202,7 @@ export const generateNextKmp = (source, pattern) => {
     return -1;
 }
 
-export const strStr = (source, pattern) => {
+const strStr = (source, pattern) => {
     if (pattern.length == 0) {
         return 0;
     }
