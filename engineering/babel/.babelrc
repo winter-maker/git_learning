@@ -1,0 +1,7 @@
+{
+    // "plugins": [
+    //     //箭头函数转换器
+    //     "babel-plugin-transform-es2015-arrow-functions",
+    // ]
+    "presets": ["babel-preset-es2015"]
+}

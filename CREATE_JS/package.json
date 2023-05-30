@@ -1,0 +1,16 @@
+{
+  "name": "create_js",
+  "version": "1.0.0",
+  "description": "",
+  "main": "quadricOperation.js",
+  "scripts": {
+    "test": "jest __test__/lrsyntax2.spec.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "^7.20.11",
+    "jest": "^29.4.3",
+    "jest-environment-jsdom": "^29.4.3"
+  }
+}

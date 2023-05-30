@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>响应式数据和副作用函数</title>
+  </head>
+  <body>
+    <script>
+      const bucket = new Set();
+      const data = { name: "duxin" };
+      const obj = new Proxy(data, {
+        //拦截读取操作
+        get(target, key) {
+          bucket.add(effect);
+          return target[key];
+        },
+        // 拦截设置操作
+        set(target, key, newval) {
+          target[key] = newval;
+          bucket.forEach((fn) => fn());
+          return true;
+        },
+      });
+      function effect() {
+        document.body.innerText = data.name;
+      }
+      effect();
+      setTimeout(() => {
+        obj.name = "0678";
+      }, 2000);
+    </script>
+  </body>
+</html>

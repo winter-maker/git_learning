@@ -1,0 +1,24 @@
+{
+  "name": "eslint",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint ./src/*.*",
+    "prettier": "prettier --write \"src/**/*.*\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.57.0",
+    "@typescript-eslint/parser": "^5.57.0",
+    "eslint": "^8.36.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "prettier": "^2.8.7",
+    "typescript": "^5.0.2",
+    "vue-eslint-parser": "^9.1.0"
+  }
+}
