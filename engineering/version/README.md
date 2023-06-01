@@ -107,11 +107,12 @@ ssh         user@git-server.com:path/to/repo.git    工作中最常用的智能�
 哑协议传输进度不可见；智能协议进度可见；智能协议传输速度比哑协议快
 
 git clone --bare /e/code/TrainingCamp/engineering/git/git_learning 
+git clone --bare /e/code/TrainingCamp/engineering/git/git_learning  git_learning_02 克隆下来本地重命名
 git clone --bare file:///path/to/repo.git 备份不带工作区的远端仓库
 git remote -v   查看远程地址
 git remote add zhineng file:///path/to/repo.git 添加远程地址
 git push origin branch
-
+git push -f 强制push,团队合作禁止使用
 
 
 git merge --abort 取消合并状态
@@ -125,5 +126,22 @@ cat file 查看文件
 vi file 编辑文件
 find .git/objects -type f 找文件夹下类型是文件的
 echo "hello world" > readme 创建readme文件写入hello world
+
+github的目标使git更容易，更直观的版本管理系统，让我们协作编写代码更容易。
+创建自己的blog
+features 特性：code review , 项目管理，团队管理，集成，开源，静态站点，存放代码。
+create organization 组织性仓库
+工作流：主干开发，git flow, github flow, gitlab flow,
+Insights -> Network ,集成graph
+pull request
+stars:>100000 labels 
+code review 要在setting -> branchs 里面设置分支，pull requeset 申请合并->指定人员
+多分支集成， git rebase, git rerere
+持续集成中保证集成分支的质量
+github apps
+releases -> ci -> yml deploy
+wiki 本身是git仓库
+gitlab 优点：企业自己搭环境，易用性好，
+
 
 
